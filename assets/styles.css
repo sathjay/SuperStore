@@ -1,0 +1,43 @@
+.mainContainer {
+  padding-left: 7%;
+  padding-right: 7%;
+}
+
+.header-row {
+  background-color: #00005f;
+  color: white;
+}
+
+.card {
+  padding-left: 0;
+  padding-right: 0;
+  margin-left: 0;
+  margin-right: 0;
+  background-color: rgb(112, 175, 215);
+  color: white;
+  border-radius: 0;
+}
+
+.card-title {
+  color: white;
+}
+
+.no-padding {
+  padding: 0 !important;
+}
+
+.icon-size {
+  font-size: 130%;
+}
+
+.no-underline {
+  text-decoration: none !important;
+}
+
+.active-link {
+  color: yellow; /* or any color you prefer for the active link */
+}
+
+.inactive-link {
+  color: white;
+}
