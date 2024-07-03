@@ -3,6 +3,10 @@
   padding-right: 7%;
 }
 
+.Container {
+  width: 100%;
+}
+
 .header-row {
   background-color: #00005f;
   color: white;
@@ -41,4 +45,9 @@
 
 .inactive-link {
   color: white;
+}
+
+.title {
+  margin-top: 3%;
+  margin-left: 7%;
 }

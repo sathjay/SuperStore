@@ -1,4 +1,5 @@
 import pandas as pd
+from Functions.USA_map import state_codes
 
 
 def load_and_preprocess_data(file_path):
@@ -16,11 +17,15 @@ def load_and_preprocess_data(file_path):
     df['Profit'] = df['Profit'].astype(float).round(2)
     df['Quantity'] = df['Quantity'].astype(int)
 
-    original_sales_data = df.copy()  # Save a copy of the original data
+    # Map state names to state codes
+    if 'State' in df.columns:
+        df['State Code'] = df['State'].map(state_codes)
 
-    # Create 'Profit Margin' column and # Round 'Profit Margin' to two decimal places
-    df['Profit Margin'] = (df['Profit'] / df['Sales']) * 100
-    df['Profit Margin'] = df['Profit Margin'].round(2)
+    # Extract the year from 'Order Date' and get unique years
+    df['Year'] = df['Order Date'].dt.year
+    unique_years = df['Year'].unique()
+    unique_years.sort()
+    unique_years = unique_years[::-1]  # Reverse the order of years
 
     # Merge or join with returns data if needed
 
@@ -38,7 +43,6 @@ def load_and_preprocess_data(file_path):
     else:
         print("Some 'Returned' values are incorrectly populated.")
 
-    # Any additional preprocessing steps
-    sales_data_with_return_and_profit_margin = df.copy()
+    sales_data = df.copy()  # Save a copy of the original data
 
-    return original_sales_data, sales_data_with_return_and_profit_margin
+    return sales_data, unique_years

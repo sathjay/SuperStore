@@ -12,18 +12,8 @@ from pages.home_page import home_page_layout
 from pages.graph_page import graph_page_layout
 from pages.table_page import table_page_layout
 
-from Functions import load_and_preprocess_data
 
-
-# File path to the Excel file
-file_path = 'assets/Sample - Superstore.xlsx'
-
-# Load and preprocess the data
-original_sales_data, sales_data_with_return_and_profit_margin = load_and_preprocess_data(
-    file_path)
-
-
-app.layout = dbc.Container([
+header_row = dbc.Container([
     dbc.Row([
 
         dbc.Col(
@@ -89,12 +79,17 @@ app.layout = dbc.Container([
 
     ], className="header-row no-gutters align-items-center justify-content-center"),
 
+
+], fluid=True, className="Container")
+
+
+app.layout = html.Div([
+    dcc.Location(id='url', refresh=False),
+    header_row,
+
     html.Div(id='page-content'),
 
-    dcc.Location(id='url', refresh=False)
-
-
-], fluid=True, className="mainContainer")
+],  className="mainContainer")
 
 
 @app.callback(
