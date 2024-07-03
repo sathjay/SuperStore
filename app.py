@@ -5,22 +5,23 @@ from dash.dcc import Location, Link
 from dash.dependencies import Input, Output, State
 
 
+from index import app  # Import the app from index.py
+
+
 from pages.home_page import home_page_layout
 from pages.graph_page import graph_page_layout
 from pages.table_page import table_page_layout
 
-# External Style Sheet Set up:
-
-font_awesome1 = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css'
-font_awesome2 = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/regular.min.css'
-font_awesome3 = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/solid.min.css'
-
-external_stylesheets = [font_awesome1, font_awesome2,
-                        font_awesome3, dbc.themes.BOOTSTRAP]
+from Functions import load_and_preprocess_data
 
 
-app = dash.Dash(__name__, title='SuperStore Data & Analytics', external_stylesheets=external_stylesheets,
-                suppress_callback_exceptions=True, prevent_initial_callbacks=True)
+# File path to the Excel file
+file_path = 'assets/Sample - Superstore.xlsx'
+
+# Load and preprocess the data
+original_sales_data, sales_data_with_return_and_profit_margin = load_and_preprocess_data(
+    file_path)
+
 
 app.layout = dbc.Container([
     dbc.Row([
@@ -38,8 +39,8 @@ app.layout = dbc.Container([
                         # FontAwesome Home icon
                         html.I(
                             className="fa-solid fa-home  me-1 text-white icon-size "),
-                        html.H3("Home Page", id="home-link",
-                                className="card-title d-inline inactive-link")
+                        html.H4("Home Page", id="home-link",
+                                className="card-title inactive-link")
                     ],
                         href="/",
                         className="stretched-link d-flex align-items-center no-underline")
@@ -56,8 +57,8 @@ app.layout = dbc.Container([
                         # FontAwesome Table icon
                         html.I(
                             className="fa-solid fa-table   me-1 text-white icon-size "),
-                        html.H3("Table Page", id="table-link",
-                                className="card-title d-inline inactive-link")
+                        html.H4("Table Page", id="table-link",
+                                className="card-title inactive-link")
                     ],
                         href="/table",
                         className="stretched-link d-flex align-items-center no-underline")
@@ -74,13 +75,13 @@ app.layout = dbc.Container([
                         # FontAwesome Chart icon
                         html.I(
                             className="fa-solid fa-chart-line  me-1 text-white icon-size"),
-                        html.H3("Graph Page", id="graph-link",
-                                className="card-title d-inline inactive-link")
+                        html.H4("Graph Page", id="graph-link",
+                                className="card-title inactive-link")
                     ],
                         href="/graph",
                         className="stretched-link d-flex align-items-center no-underline")
                 ]),
-                className="text-center justify-content-center align-items-center"
+                className="text-center d-flex justify-content-center align-items-center"
             )],
             width=2,
             className="no-padding"

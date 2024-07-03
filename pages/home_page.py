@@ -7,6 +7,8 @@ from dash import html
 from dash import dash_table
 from dash.dependencies import Input, Output, State
 
+from index import app
+
 
 
 home_page_layout = html.Div([
