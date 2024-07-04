@@ -51,3 +51,20 @@
   margin-top: 3%;
   margin-left: 7%;
 }
+
+.graph-container {
+  padding: 5px;
+  border: 1px solid #ccc;
+  margin: 2px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Light shadow for elevation effect */
+  border-radius: 8px; /* Optional: adds rounded corners for a smoother look */
+  background-color: white; /* Optional: sets a background color for the container */
+}
+
+.graph-row {
+  margin: 0; /* Adjusts margin for the row to ensure containers fit well */
+}
+
+.graph-column {
+  padding: 5px;
+}

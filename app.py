@@ -18,9 +18,9 @@ header_row = dbc.Container([
 
         dbc.Col(
 
-            html.H2("SuperStore Data and Analytics Dashboard"),
+            html.H2("SuperStore"),
             width=6,
-            className="text-center d-flex align-items-center justify-content-center"
+            className="d-flex align-items-center justify-content-center"
         ),
         dbc.Col([
             dbc.Card(

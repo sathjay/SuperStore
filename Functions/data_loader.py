@@ -23,6 +23,7 @@ def load_and_preprocess_data(file_path):
 
     # Extract the year from 'Order Date' and get unique years
     df['Year'] = df['Order Date'].dt.year
+    df['Month'] = df['Order Date'].dt.month
     unique_years = df['Year'].unique()
     unique_years.sort()
     unique_years = unique_years[::-1]  # Reverse the order of years
