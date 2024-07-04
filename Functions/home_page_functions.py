@@ -237,4 +237,35 @@ def choropleth_dataframe(sales_data, selected_year):
         aggregated_data['Profit'] / aggregated_data['Sales'] * 100).round(2)
 
     # Return the aggregated data
-    return choropleth_dataframe
+    return aggregated_data
+
+
+def choropleth_map_creation(data, metric):
+    # Optionally preprocess data if necessary
+
+    fig = px.choropleth(
+        data_frame=data,
+        locations='State Code',  # Use state codes for locations
+        color=metric,  # Data column that determines the color of the map areas
+        hover_name='State',  # State names will appear in the tooltip
+        hover_data=[metric],  # Additional data to appear in the tooltip
+        locationmode='USA-states',  # Set the location mode to USA states
+        color_continuous_scale='BuGn',  # Color scale
+        scope='usa',  # Limit the map scope to the USA
+        labels={metric: metric}  # Label for the color bar
+    )
+
+    fig.add_scattergeo(
+        locations=data['State Code'],  # codes for states,
+        locationmode='USA-states',
+        text=data['State Code'],
+        mode='text'
+    )
+
+    fig.update_layout(
+        title_text=f'{metric} by US States',
+        geo=dict(lakecolor='white'),
+        margin={"r": 0, "t": 30, "l": 0, "b": 0}
+    )
+
+    return fig

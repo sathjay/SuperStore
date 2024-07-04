@@ -11,7 +11,7 @@ from plotly.subplots import make_subplots
 from index import app
 from Functions.data_loader import load_and_preprocess_data
 from Functions.USA_map import state_codes
-from Functions.home_page_functions import selected_year_previous_year_data_of_state, aggregate_data_by_month, create_line_chart, aggregate_kpi_level, create_indicator
+from Functions.home_page_functions import selected_year_previous_year_data_of_state, aggregate_data_by_month, create_line_chart, aggregate_kpi_level, create_indicator, choropleth_dataframe, choropleth_map_creation
 
 
 # File path to the Excel file
@@ -41,6 +41,12 @@ home_page_layout = html.Div([
                                  className='graph-container'), width=3),
             ], className='graph-row'),
 
+            dbc.Row([
+                dbc.Col(html.Div([
+                    # ID to update from callback
+                    dcc.Graph(id='choropleth-map')
+                ]), width=12)  # Full width to display the map across the entire row
+            ]),
 
 
 
@@ -86,6 +92,18 @@ home_page_layout = html.Div([
                 style={'width': '100%', 'padding': '10px'}
             ),
             html.Div(id='display-selected-state')
+            # New Dropdown for selecting the metric
+            dcc.Dropdown(
+                id='metric-dropdown',
+                options=[
+                    {'label': 'Sales', 'value': 'Sales'},
+                    {'label': 'Quantity', 'value': 'Quantity'},
+                    {'label': 'Profit', 'value': 'Profit'},
+                    {'label': 'Profit Margin', 'value': 'Profit Margin'}
+                ],
+                value='Sales',  # default to 'Sales'
+                style={'width': '100%', 'padding': '10px'}
+            ),
         ]), width=2),
     ])
 ])
@@ -96,15 +114,17 @@ home_page_layout = html.Div([
      Output('quantity-kpi', 'figure'),
      Output('profit-kpi', 'figure'),
      Output('margin-kpi', 'figure'),
+     Output('choropleth-map', 'figure'),
      Output('sales-chart', 'figure'),
      Output('quantity-chart', 'figure'),
      Output('profit-chart', 'figure'),
      Output('margin-chart', 'figure')],
     [Input('year-dropdown', 'value'),
-     Input('state-dropdown', 'value')]
+     Input('state-dropdown', 'value'),
+     Input('metric-dropdown', 'value')]
 
 )
-def display_selected(year, state_code):
+def display_selected(year, state_code, metric):
 
     print(f'Year: {year}, State: {state_code}')
     print(f'Type of year: {type(year)}, Type of state: {type(state_code)}')
@@ -147,4 +167,9 @@ def display_selected(year, state_code):
     margin_kpi = create_indicator(kpi_display_data['Profit Margin'].iloc[0],
                                   kpi_display_data['Profit Margin Change'].iloc[0], 'Profit Margin', is_currency=False, is_percentage=True)
 
-    return sales_kpi, quantity_kpi, profit_kpi, margin_kpi, sales_chart, quantity_chart, profit_chart, margin_chart
+    # Create choropleth map
+    choropleth_data = choropleth_dataframe(sales_data, year)
+
+    choropleth_fig = choropleth_map_creation(choropleth_data, metric)
+
+    return sales_kpi, quantity_kpi, profit_kpi, margin_kpi, choropleth_fig, sales_chart, quantity_chart, profit_chart, margin_chart
