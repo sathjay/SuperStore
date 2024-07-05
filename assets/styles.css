@@ -1,6 +1,6 @@
 .mainContainer {
-  padding-left: 7%;
-  padding-right: 7%;
+  width: 100%;
+  padding-bottom: 40px;
 }
 
 .Container {
@@ -10,6 +10,13 @@
 .header-row {
   background-color: #00005f;
   color: white;
+  margin-left: 5%;
+  margin-right: 5%;
+}
+
+.layout {
+  margin-left: 6.4%;
+  margin-right: 6.4%;
 }
 
 .card {
@@ -48,7 +55,7 @@
 }
 
 .title {
-  margin-top: 3%;
+  margin-top: 1%;
   margin-left: 7%;
 }
 
@@ -56,7 +63,21 @@
   padding: 5px;
   border: 1px solid #ccc;
   margin: 2px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Light shadow for elevation effect */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Light shadow for elevation effect */
+  border-radius: 8px; /* Optional: adds rounded corners for a smoother look */
+  background-color: white; /* Optional: sets a background color for the container */
+}
+
+.map-row {
+  margin: 0; /* Adjusts margin for the row to ensure containers fit well */
+  padding: 4px;
+}
+
+.map-container {
+  padding: 5px;
+  border: 1px solid #ccc;
+  margin: 2px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Light shadow for elevation effect */
   border-radius: 8px; /* Optional: adds rounded corners for a smoother look */
   background-color: white; /* Optional: sets a background color for the container */
 }
@@ -67,4 +88,20 @@
 
 .graph-column {
   padding: 5px;
+}
+
+.dashboard-column {
+  background-color: rgb(229, 226, 226);
+  padding-bottom: 30px;
+}
+
+.control-column {
+  padding-top: 17%;
+  padding-left: 20px;
+  background-color: rgb(163, 161, 161);
+}
+
+.dropdown-style {
+  width: 90%; /* Set width to 90% of parent container */
+  padding: 12px; /* Set padding around the dropdown */
 }

@@ -9,9 +9,9 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 from index import app
-from Functions.data_loader import load_and_preprocess_data
+from Functions.data_loader import load_and_preprocess_data, add_week_and_quarter
 from Functions.USA_map import state_codes
-from Functions.home_page_functions import selected_year_previous_year_data_of_state, aggregate_data_by_month, create_line_chart, aggregate_kpi_level, create_indicator, choropleth_dataframe, choropleth_map_creation
+from Functions.home_page_functions import metric_dropdown, category_dropdown, update_title, update_map_title, update_metric_trends_title, selected_year_previous_year_data_of_state, aggregate_data_by_month, create_line_chart, aggregate_kpi_level, create_indicator, choropleth_dataframe, choropleth_map_creation
 
 
 # File path to the Excel file
@@ -24,107 +24,104 @@ sales_data, unique_years = load_and_preprocess_data(
 home_page_layout = html.Div([
 
     dbc.Row([
-        dbc.Col(html.H1("Sales Summary"), className='title', width=12)
-    ]),
 
-    dbc.Row([
-        dbc.Col(html.Div([
-
+        dbc.Col([
             dbc.Row([
-                dbc.Col(html.Div([dcc.Graph(id='sales-kpi')],
-                                 className='graph-container'), width=3),
-                dbc.Col(html.Div([dcc.Graph(id='quantity-kpi')],
-                                 className='graph-container'), width=3),
-                dbc.Col(html.Div([dcc.Graph(id='profit-kpi')],
-                                 className='graph-container'), width=3),
-                dbc.Col(html.Div([dcc.Graph(id='margin-kpi')],
-                                 className='graph-container'), width=3),
-            ], className='graph-row'),
-
-            dbc.Row([
-                dbc.Col(html.Div([
-                    # ID to update from callback
-                    dcc.Graph(id='choropleth-map')
-                ]), width=12)  # Full width to display the map across the entire row
+                html.H3(id='map-title',
+                    children="Overview by State", className='title'),
             ]),
 
+            dbc.Row([
+                dbc.Col(html.Div([dcc.Graph(
+                    id='choropleth-map', config={'displayModeBar': False})], className='map-container'), width=12)
+            ], className='map-row'),
 
 
             dbc.Row([
-                dbc.Col(html.Div([
-                    dcc.Graph(id='sales-chart',
-                              config={'displayModeBar': False}, style={'height': '260px'})
-                ], className='graph-container'), width=3),
+                    dbc.Col(html.H3(id='summary-title',
+                                    children="SuperStore Executive Summary"), className='title', width=12)
+                    ]),
 
-                dbc.Col(html.Div([
-                    dcc.Graph(id='quantity-chart',
-                              config={'displayModeBar': False}, style={'height': '260px'})
-                ], className='graph-container'), width=3),
+            dbc.Row([
+                    dbc.Col(html.Div([dcc.Graph(id='sales-kpi')],
+                                     className='graph-container'), width=3),
+                    dbc.Col(html.Div([dcc.Graph(id='quantity-kpi')],
+                                     className='graph-container'), width=3),
+                    dbc.Col(html.Div([dcc.Graph(id='profit-kpi')],
+                                     className='graph-container'), width=3),
+                    dbc.Col(html.Div([dcc.Graph(id='margin-kpi')],
+                                     className='graph-container'), width=3),
+                    ], className='graph-row'),
 
-                dbc.Col(html.Div([
-                    dcc.Graph(id='profit-chart',
-                              config={'displayModeBar': False}, style={'height': '260px'})
-                ], className='graph-container'), width=3),
+            dbc.Row([
+                html.H3(id='trend-graph-title',
+                    children="Metric trends", className='title'),
+            ]),
 
-                dbc.Col(html.Div([
-                    dcc.Graph(id='margin-chart',
-                              config={'displayModeBar': False}, style={'height': '260px'})
-                ], className='graph-container'), width=3),
-            ], className='graph-row')
+            dbc.Row([
+                    dbc.Col(html.Div([dcc.Graph(id='sales-chart', config={'displayModeBar': False}, style={
+                        'height': '260px'})], className='graph-container'), width=3),
+                    dbc.Col(html.Div([dcc.Graph(id='quantity-chart', config={'displayModeBar': False}, style={
+                        'height': '260px'})], className='graph-container'), width=3),
+                    dbc.Col(html.Div([dcc.Graph(id='profit-chart', config={'displayModeBar': False}, style={
+                        'height': '260px'})], className='graph-container'), width=3),
+                    dbc.Col(html.Div([dcc.Graph(id='margin-chart', config={'displayModeBar': False}, style={
+                        'height': '260px'})], className='graph-container'), width=3),
+                    ], className='graph-row'),
 
-        ]), width=10),
+        ], className='dashboard-column', width=10),
 
-        dbc.Col(html.Div([
+        dbc.Col([
             html.H4("Controls", className="text-center"),
+            html.Label("Select Year", className="dropdown-label"),
             dcc.Dropdown(
                 id='year-dropdown',
                 options=[{'label': str(year), 'value': year}
                          for year in unique_years],
                 value=max(unique_years),
-                style={'width': '100%', 'padding': '10px'}
+                className='dropdown-style'
             ),
+            html.Label("Select Metric", className="dropdown-label"),
+            dcc.Dropdown(
+                id='metric-dropdown',
+                options=metric_dropdown,
+                value='Profit',
+                className='dropdown-style'
+            ),
+            html.Label("Select State", className="dropdown-label"),
             dcc.Dropdown(
                 id='state-dropdown',
-                # Assuming state_codes is already defined or imported
                 options=[{'label': state, 'value': code}
                          for state, code in state_codes.items()],
                 value=next(iter(state_codes.values())),
-                style={'width': '100%', 'padding': '10px'}
+                className='dropdown-style'
             ),
-            html.Div(id='display-selected-state')
-            # New Dropdown for selecting the metric
-            dcc.Dropdown(
-                id='metric-dropdown',
-                options=[
-                    {'label': 'Sales', 'value': 'Sales'},
-                    {'label': 'Quantity', 'value': 'Quantity'},
-                    {'label': 'Profit', 'value': 'Profit'},
-                    {'label': 'Profit Margin', 'value': 'Profit Margin'}
-                ],
-                value='Sales',  # default to 'Sales'
-                style={'width': '100%', 'padding': '10px'}
-            ),
-        ]), width=2),
+        ], className='control-column', width=2)
     ])
 ])
 
 
 @app.callback(
-    [Output('sales-kpi', 'figure'),
+    [Output('map-title', 'children'),
+     Output('choropleth-map', 'figure'),
+     Output('summary-title', 'children'),
+     Output('sales-kpi', 'figure'),
      Output('quantity-kpi', 'figure'),
      Output('profit-kpi', 'figure'),
      Output('margin-kpi', 'figure'),
-     Output('choropleth-map', 'figure'),
+     Output('trend-graph-title', 'children'),
      Output('sales-chart', 'figure'),
      Output('quantity-chart', 'figure'),
      Output('profit-chart', 'figure'),
-     Output('margin-chart', 'figure')],
+     Output('margin-chart', 'figure')
+     ],
     [Input('year-dropdown', 'value'),
+     Input('metric-dropdown', 'value'),
      Input('state-dropdown', 'value'),
-     Input('metric-dropdown', 'value')]
+     ]
 
 )
-def display_selected(year, state_code, metric):
+def display_selected(year, metric, state_code):
 
     print(f'Year: {year}, State: {state_code}')
     print(f'Type of year: {type(year)}, Type of state: {type(state_code)}')
@@ -136,9 +133,9 @@ def display_selected(year, state_code, metric):
     aggregated_previous = aggregate_data_by_month(
         previous_data) if previous_data is not None else None
 
-    print(aggregated_current)
-    print('******')
-    print(aggregated_previous)
+    summary_title = update_title(year, state_code)
+    map_title = update_map_title(year, metric)
+    trend_graph_title = update_metric_trends_title(year, state_code)
 
     # Create charts
     sales_chart = create_line_chart(
@@ -149,6 +146,10 @@ def display_selected(year, state_code, metric):
         aggregated_current, aggregated_previous, 'Profit', )
     margin_chart = create_line_chart(
         aggregated_current, aggregated_previous, 'Profit Margin')
+
+    print(f'Current data:\n{aggregated_current}')
+    print("********************************")
+    print(f'Previous data:\n {aggregated_previous}')
 
     aggregated_kpi_data = aggregate_kpi_level(sales_data, state_code,)
     kpi_display_data = aggregated_kpi_data[aggregated_kpi_data['Year'] == year]
@@ -170,6 +171,6 @@ def display_selected(year, state_code, metric):
     # Create choropleth map
     choropleth_data = choropleth_dataframe(sales_data, year)
 
-    choropleth_fig = choropleth_map_creation(choropleth_data, metric)
+    choropleth_fig = choropleth_map_creation(choropleth_data, metric, year)
 
-    return sales_kpi, quantity_kpi, profit_kpi, margin_kpi, choropleth_fig, sales_chart, quantity_chart, profit_chart, margin_chart
+    return map_title, choropleth_fig, summary_title, sales_kpi, quantity_kpi, profit_kpi, margin_kpi, trend_graph_title, sales_chart, quantity_chart, profit_chart, margin_chart

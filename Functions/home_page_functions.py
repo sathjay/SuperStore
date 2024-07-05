@@ -5,6 +5,41 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 
+metric_dropdown = [
+    {'label': 'Sales', 'value': 'Sales'},
+    {'label': 'Quantity', 'value': 'Quantity'},
+    {'label': 'Profit', 'value': 'Profit'},
+    {'label': 'Profit Margin', 'value': 'Profit Margin'}
+
+]
+
+category_dropdown = [
+    {'label': 'Customer', 'value': 'Customer Name'},
+    {'label': 'State', 'value': 'State'},
+    {'label': 'City', 'value': 'City'},
+    {'label': 'Sub-Category', 'value': 'Sub-Category'},
+    {'label': 'Product', 'value': 'Product Name'}
+]
+
+
+def update_title(selected_year, selected_state=None):
+    if selected_year is not None:
+        return f"{selected_year} SuperStore Metric for {selected_state}"
+    return "SuperStore Executive Summary"
+
+
+def update_map_title(selected_year, metric):
+    if selected_year is not None:
+        return f"{selected_year} {metric} Overview by US States"
+    return "Overview by States"
+
+
+def update_metric_trends_title(selected_year, selected_state=None):
+    if selected_year is not None:
+        return f"{selected_year} Metric trends for {selected_state}"
+    return "Metric trends"
+
+
 def selected_year_previous_year_data_of_state(df, selected_year, selected_state, unique_years):
     # Filter data for the selected year
     selected_year = int(selected_year)
@@ -64,34 +99,79 @@ def aggregate_data_by_month(df):
     return aggregated_data
 
 
+def fill_missing_months(data):
+
+    # Added this function beacuse the data was not being displayed correctly
+    # Line Chart was not able to display the data correctly with missing months.
+
+    month_names = {
+        1: 'Jan', 2: 'Feb', 3: 'Mar', 4: 'Apr',
+        5: 'May', 6: 'Jun', 7: 'Jul', 8: 'Aug',
+        9: 'Sep', 10: 'Oct', 11: 'Nov', 12: 'Dec'
+    }
+
+    all_months = pd.DataFrame({'Month': range(1, 13)})
+    all_months['Month'] = all_months['Month'].map(month_names)
+
+    # Merge with all_months DataFrame to find missing months
+    data = all_months.merge(data, on='Month', how='left').fillna({
+        'Sales': 0,  # Assuming 0 for missing data; adjust as necessary
+        'Quantity': 0,
+        'Profit': 0,
+        'Profit Margin': 0  # Include this only if you use this metric
+    })
+
+    return data
+
+
 def create_line_chart(current_data, previous_data, metric):
 
-    # Check if previous data is available and merge with current data if it is
+    current_data = fill_missing_months(current_data)
+    previous_data = fill_missing_months(
+        previous_data) if previous_data is not None else None
+    # Create a new figure object
+    fig = go.Figure()
+
+    # Plot current year data
+    fig.add_trace(go.Scatter(
+        x=current_data['Month'],
+        y=current_data[metric],
+        mode='lines+markers',
+        name=str(current_data['Year'].iloc[0]),
+        line=dict(color='darkblue'),
+        marker=dict(color='darkblue', size=7),
+        hoverinfo='text',
+        hovertext=[
+            "Year: {}<br>{}: {:.2f}<br>Month: {}".format(
+             current_data['Year'].iloc[0], metric, y, month
+            )
+            for month, y in zip(current_data['Month'], current_data[metric])
+        ]
+    ))
+
+    # Plot previous year data if available
     if previous_data is not None:
-        # Concatenate current and previous year data without changing the 'Year' values
-        data = pd.concat([current_data, previous_data])
-    else:
-        # Use current data only if no previous data
-        data = current_data
-
-    # Custom color map for clarity and aesthetics
-    # Assuming 'Year' columns in current and previous data are already in the format like "2021", "2020"
-    color_discrete_map = {current_data['Year'].iloc[0]: 'darkblue',
-                          previous_data['Year'].iloc[0] if previous_data is not None else None: 'lightgrey'}
-
-    # Plot using Plotly Express
-    fig = px.line(data, x='Month', y=metric, color='Year',
-                  title=metric,
-                  labels={'Month': '', metric: ''},
-                  color_discrete_map=color_discrete_map,
-                  hover_data={'Year': True, metric: ':.2f', 'Month': True})
+        fig.add_trace(go.Scatter(
+            x=previous_data['Month'],
+            y=previous_data[metric],
+            mode='lines+markers',
+            name=str(previous_data['Year'].iloc[0]),
+            line=dict(color='lightgrey'),
+            marker=dict(color='lightgrey', size=7),
+            hoverinfo='text',
+            hovertext=[
+                "Year: {}<br>{}: {:.2f}<br>Month: {}".format(
+                    previous_data['Year'].iloc[0], metric, y, month
+                )
+                for month, y in zip(previous_data['Month'], previous_data[metric])
+            ]
+        ))
 
     # Update layout for the chart
     fig.update_layout(
         plot_bgcolor='white',  # Background color
         paper_bgcolor='white',  # Background color around the chart
-        showlegend=False,  # Turn off the legend
-
+        showlegend=False,  # Optionally turn on the legend
         margin=dict(l=0, r=0, t=20, b=0),
         yaxis=dict(
             showline=True,  # Show y-axis line
@@ -104,38 +184,19 @@ def create_line_chart(current_data, previous_data, metric):
             showline=True,  # Show x-axis line
             showgrid=False,  # Hide grid lines
             linecolor='black',  # x-axis line color
-
             tickmode='array',
-
-            # Specify months to show: January, April, July, October
             tickvals=[1, 4, 7, 10],
             ticktext=['Jan', 'Apr', 'Jul', 'Oct'],
-            range=[.9, 12.1]  # Adjust the range to start the x-axis at Jan
+            range=[0.5, 12.5]  # Adjust the range to encompass all months
         ),
         title={
-            'text': metric,
+            'text': f"{metric} Over Time",
             'y': 0.95,
             'x': 0.5,
             'xanchor': 'center',
             'yanchor': 'top'},
-
-        titlefont={'size': 15},
-
-        hoverlabel=dict(
-            bgcolor="lightyellow",  # Set background color to light yellow
-            font_size=12,  # Optional: adjust font size
-            font_family="Roboto"  # Optional: adjust font family
-        ),
+        titlefont={'size': 15}
     )
-
-    # Add markers to the line plot
-    fig.update_traces(mode='lines+markers',
-                      marker=dict(color='grey', size=7),
-                      hovertemplate=(
-                          "<b>Year:</b> %{customdata[0]}<br>"
-                          "<b>" + metric + ":</b> %{y:.2f}<br>"
-                          "<b>Month:</b> %{x}<extra></extra>"
-                      ))
 
     return fig
 
@@ -180,6 +241,8 @@ def aggregate_kpi_level(data, state_code):
 
 def create_indicator(value, delta, title, is_currency=False, is_percentage=False):
 
+    fig = go.Figure()
+
     delta = delta / 100  # Added to get the KPI Display to be working correctly
 
     color = 'green' if delta >= 0 else 'red'
@@ -201,8 +264,8 @@ def create_indicator(value, delta, title, is_currency=False, is_percentage=False
     ))
 
     fig.update_layout(
-        height=90,
-        margin={'l': 10, 'r': 10, 't': 30, 'b': 10},
+        height=85,
+        margin={'l': 10, 'r': 10, 't': 26, 'b': 10},
         paper_bgcolor="white",
         title={
             'text': 'Gross ' + title,
@@ -240,8 +303,10 @@ def choropleth_dataframe(sales_data, selected_year):
     return aggregated_data
 
 
-def choropleth_map_creation(data, metric):
+def choropleth_map_creation(data, metric, year):
     # Optionally preprocess data if necessary
+
+    fig = go.Figure()
 
     fig = px.choropleth(
         data_frame=data,
@@ -255,17 +320,78 @@ def choropleth_map_creation(data, metric):
         labels={metric: metric}  # Label for the color bar
     )
 
-    fig.add_scattergeo(
-        locations=data['State Code'],  # codes for states,
-        locationmode='USA-states',
-        text=data['State Code'],
-        mode='text'
-    )
+    # fig.add_scattergeo(
+    #     locations=data['State Code'],  # codes for states,
+    #     locationmode='USA-states',
+    #     text=data['State Code'],
+    #     mode='text'
+    # )
 
     fig.update_layout(
-        title_text=f'{metric} by US States',
         geo=dict(lakecolor='white'),
-        margin={"r": 0, "t": 30, "l": 0, "b": 0}
+        margin={"r": 0, "t": 30, "l": 0, "b": 0},
+        coloraxis_colorbar=dict(
+            x=0.85  # Adjust this value as needed to move the color scale inward
+        )
+    )
+
+    return fig
+
+
+def key_figures(sales_data, year, metric, category):
+
+    fig = go.Figure()
+    combined_data = pd.DataFrame()
+
+    # Step 1: Filter data for the selected year
+    filtered_data = sales_data[sales_data['Year'] == year]
+
+    columns_to_keep = ['Year', category, metric]
+    filtered_data = filtered_data[columns_to_keep]
+
+    # Step 2: Group by the category and sum the metric
+    grouped_data = filtered_data.groupby(category).agg({
+        metric: 'sum'
+    }).reset_index()
+
+    # Round the metric to the nearest integer
+    grouped_data[metric] = grouped_data[metric].round(0)
+
+    # Step 3: Sort the data by the metric to get top and bottom performers
+    top_performers = grouped_data.nlargest(5, metric)
+    bottom_performers = grouped_data.nsmallest(5, metric)
+
+    fig = go.Figure()
+
+    # Combine top and bottom for plotting
+    combined_data = pd.concat(
+        [top_performers, bottom_performers]).sort_values(by=metric)
+
+    # Step 4: Create a horizontal bar graph
+    fig = px.bar(combined_data, x=metric, y=category, orientation='v', color=metric, color_continuous_scale='BuGn',
+                 title=f"Top & Bottom 5 {category} in {year} by {metric}")
+
+    # Update layout for clarity
+    fig.update_layout(
+        yaxis=dict(categoryorder='total ascending',
+                   showline=True,  # Show y-axis line
+                   showgrid=False,
+                   ),
+        xaxis=dict(
+            showline=True,  # Show y-axis line
+            showgrid=False,
+        ),
+
+        xaxis_title=metric,
+        yaxis_title=category,
+        coloraxis_showscale=False,
+        plot_bgcolor='rgba(0,0,0,0)',  # Make background transparent
+        # Make the area around the graph transparent
+        paper_bgcolor='rgba(0,0,0,0)',
+        showlegend=False,  # Optionally hide the legend if not needed
+
+
+        xaxis_tickformat=',.2f'  # Format the metric values for better readability
     )
 
     return fig

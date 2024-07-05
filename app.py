@@ -87,7 +87,7 @@ app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
     header_row,
 
-    html.Div(id='page-content'),
+    html.Div(id='layout-content', className='layout'),
 
 ],  className="mainContainer")
 
@@ -115,7 +115,7 @@ def update_active_link(pathname):
     return home_class, table_class, graph_class
 
 
-@app.callback(Output("page-content", "children"), [Input("url", "pathname")])
+@app.callback(Output("layout-content", "children"), [Input("url", "pathname")])
 def render_page_content(pathname):
 
     if pathname == "/":

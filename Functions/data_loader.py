@@ -24,6 +24,10 @@ def load_and_preprocess_data(file_path):
     # Extract the year from 'Order Date' and get unique years
     df['Year'] = df['Order Date'].dt.year
     df['Month'] = df['Order Date'].dt.month
+
+    # Sort data by 'Year' and 'Month'
+    df.sort_values(by=['Year', 'Month'], inplace=True)
+
     unique_years = df['Year'].unique()
     unique_years.sort()
     unique_years = unique_years[::-1]  # Reverse the order of years
@@ -33,6 +37,8 @@ def load_and_preprocess_data(file_path):
     df = df.merge(df_return[['Order ID', 'Returned']],
                   on='Order ID', how='left')
     df['Returned'] = df['Returned'].fillna('No')
+
+    df.sort_values(by='Order Date', inplace=True)
 
     df_return_yes = df_return[df_return['Returned'] == 'Yes']['Order ID']
     df_merged_yes = df[df['Returned'] == 'Yes']['Order ID']
@@ -47,3 +53,18 @@ def load_and_preprocess_data(file_path):
     sales_data = df.copy()  # Save a copy of the original data
 
     return sales_data, unique_years
+
+
+def add_week_and_quarter(sales_data):
+    # Add 'Week' column using ISO week number
+    sales_data['Week'] = sales_data['Order Date'].dt.isocalendar().week
+
+    # Add 'Quarter' column
+    sales_data['Quarter'] = sales_data['Order Date'].dt.quarter
+
+    # Calculate the number of days to ship
+    sales_data['Days to Ship'] = (
+        sales_data['Ship Date'] - sales_data['Order Date']).dt.days
+
+    sales_data.sort_values(by='Order Date', inplace=True)
+    return sales_data
