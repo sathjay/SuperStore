@@ -14,7 +14,7 @@ from index import app
 
 from Functions.data_loader import load_and_preprocess_data, add_week_and_quarter
 from Functions.USA_map import state_codes
-from Functions.graph_page_functions import metrics_options, granularity_options, breakdown_options, filter_data
+from Functions.graph_page_functions import metrics_options, granularity_options, breakdown_options, filter_data, get_groupby_columns, aggregate_data
 
 # File path to the Excel file
 file_path = 'assets/Sample - Superstore.xlsx'
@@ -97,8 +97,9 @@ def update_timeline_graph(start_date, end_date, granularity, selected_metric):
     filtered_data = filter_data(
         sales_data_with_q_info, start_date, end_date, selected_metric, granularity)
 
-    print(filtered_data.head())
+    groupby_columns = get_groupby_columns(filtered_data, selected_metric)
 
-    print(filtered_data.tail())
+    aggregate_data_for_chart = aggregate_data(
+        filtered_data, groupby_columns, selected_metric)
 
-    print(filtered_data.columns)
+    print(aggregate_data_for_chart)

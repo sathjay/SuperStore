@@ -31,3 +31,38 @@ def filter_data(dataframe, start_date, end_date, selected_metric, selected_granu
     final_filtered_df = date_filtered_df[columns_to_keep]
 
     return final_filtered_df
+
+
+def get_groupby_columns(dataframe, selected_metric):
+    # Create a list of columns for grouping by removing the selected_metric
+    groupby_columns = [
+        col for col in dataframe.columns if col != selected_metric]
+    return groupby_columns
+
+
+def aggregate_data(dataframe, groupby_columns, selected_metric):
+    # Define the aggregation dictionary based on the metric
+    aggregation_methods = {
+        'Days to Ship': 'mean',
+        'Discount': 'mean',
+        'Profit': 'sum',
+        'Quantity': 'sum',
+        'Sales': 'sum',
+        # Only aggregate if 'Returned' is the selected metric
+        'Returned': ('sum' if selected_metric == 'Returned' else None)
+    }
+
+    # Check if the selected metric is 'Returned' to count 'Yes'
+    if selected_metric == 'Returned':
+        # Convert 'Returned' to a numeric value where 'Yes' is 1 and otherwise 0
+        dataframe['Returned'] = dataframe['Returned'].apply(
+            lambda x: 1 if x == 'Yes' else 0)
+
+    # Determine the aggregation method from the dictionary, default to sum if not specified
+    agg_method = aggregation_methods.get(selected_metric, 'sum')
+
+    # Perform the aggregation
+    aggregated_df = dataframe.groupby(groupby_columns).agg(
+        {selected_metric: agg_method}).reset_index()
+
+    return aggregated_df
