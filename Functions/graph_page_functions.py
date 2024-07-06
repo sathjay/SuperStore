@@ -1,4 +1,5 @@
 import pandas as pd
+import plotly.express as px
 
 # Define options for dropdowns
 metrics_options = [{'label': "Days to Ship", 'value': "Days to Ship"},
@@ -96,6 +97,97 @@ def aggregate_data_for_timeline_graph(final_filtered_df, group_by_list, selected
     return aggregated_data
 
 
+def create_combined_date_column(dataframe):
+    """
+    Dynamically create a 'Date' column in the dataframe based on available time components.
+
+    Args:
+    dataframe (DataFrame): The dataframe with potential columns 'Year', 'Month', 'Week', 'Quarter'.
+
+    Returns:
+    DataFrame: The modified dataframe with a new 'Date' column.
+    """
+    # Initialize 'Date' as 'Year' first
+    if 'Year' in dataframe.columns:
+        dataframe['Date'] = dataframe['Year'].astype(str)
+
+    # If 'Month' is available, add it to 'Date'
+    if 'Month' in dataframe.columns:
+        dataframe['Date'] = dataframe['Date'] + '-' + \
+            dataframe['Month'].astype(str).str.zfill(2)
+
+    # If 'Week' is available, format it with 'W' prefix
+    if 'Week' in dataframe.columns:
+        dataframe['Date'] = dataframe['Year'].astype(
+            str) + '-W' + dataframe['Week'].astype(str).str.zfill(2)
+
+    # If 'Quarter' is available, format it with 'Q' prefix
+    if 'Quarter' in dataframe.columns:
+        dataframe['Date'] = dataframe['Year'].astype(
+            str) + '-Q' + dataframe['Quarter'].astype(str)
+
+    return dataframe
+
+
+def create_line_chart(dataframe, metric):
+    """
+    Creates a line chart with 'Date' on the x-axis and the specified metric on the y-axis.
+
+    Args:
+    dataframe (pd.DataFrame): The DataFrame containing the data to plot.
+    metric (str): The column name of the metric to plot on the y-axis.
+
+    Returns:
+    plotly.graph_objs.Figure: The figure object containing the line chart.
+
+    """
+    # Generate the line chart
+    fig = px.line(
+        dataframe,
+        x='Date',  # Assuming 'Date' is already in a suitable format for display
+        y=metric,
+        markers=True,  # Optionally add markers to each data point
+        line_shape='linear'  # Ensures the line is straight and does not interpolate
+    )
+
+    # Update layout to enhance readability
+    fig.update_layout(
+        xaxis_title='Date',
+        yaxis_title=metric,
+        plot_bgcolor='white',  # Sets background color to white
+        paper_bgcolor='white',  # Sets surrounding paper color to white
+        hovermode='x',  # Enhances hover interaction by highlighting all data for any given x-coordinate
+        margin=dict(l=0, r=0, t=25, b=0),
+        xaxis=dict(
+            showline=True,  # Show x-axis line
+            showgrid=False,  # Hide grid lines
+            linecolor='black',  # x-axis line color
+        ),
+
+        yaxis=dict(
+            showline=True,  # Show y-axis line
+            showgrid=False,  # Hide grid lines
+            linecolor='black',  # y-axis line color
+        ),
+        title={
+            'text': f'Timeline of {metric}',
+            'y': 0.95,
+            'x': 0.5,
+            'xanchor': 'center',
+            'yanchor': 'top'},
+        titlefont={'size': 15}
+    )
+
+    # Customize x-axis ticks and labels for better visualization
+    fig.update_xaxes(
+        tickangle=45,  # Rotates labels to prevent overlap
+        # Treats the x-axis values as categories (important for non-numeric dates)
+        type='category'
+    )
+
+    return fig
+
+
 def bubble_chart_dataframe(dataframe, start_date, end_date, selected_metric, metric_list, breakdown):
     # Convert start and end dates to datetime objects
     start_date = pd.to_datetime(start_date)
@@ -117,6 +209,8 @@ def bubble_chart_dataframe(dataframe, start_date, end_date, selected_metric, met
     avg_agg_df_columns = ['Days to Ship', 'Discount', breakdown]
     avg_agg_df = filtered_df[avg_agg_df_columns].groupby(
         breakdown).mean().reset_index()
+    avg_agg_df['Days to Ship'] = avg_agg_df['Days to Ship'].round(2)
+    avg_agg_df['Discount'] = avg_agg_df['Discount'].round(2)
 
     # Define columns for sum aggregation
     sum_agg_df_columns = ['Profit', 'Quantity', 'Sales', 'Returned', breakdown]
@@ -131,3 +225,58 @@ def bubble_chart_dataframe(dataframe, start_date, end_date, selected_metric, met
     final_bubble_chart_df = pd.merge(avg_agg_df, sum_agg_df, on=breakdown)
 
     return final_bubble_chart_df
+
+
+def preprocess_data_for_bubble_chart(df, size_metric):
+    # Ensure all size values are positive; replace negative values with a small positive value
+    df[size_metric] = df[size_metric].apply(lambda x: 0.2 if x < 0 else x)
+    return df
+
+
+def create_bubble_chart(bubble_chart_df, x_axis, y_axis, size_metric, color_breakdown):
+
+    # Preprocess the dataframe to adjust size metric values
+    bubble_chart_df = preprocess_data_for_bubble_chart(
+        bubble_chart_df, size_metric)
+
+    # Create the bubble chart using Plotly Express
+    fig = px.scatter(
+        bubble_chart_df,
+        x=x_axis,
+        y=y_axis,
+        size=size_metric,
+        color=color_breakdown,
+        hover_name=color_breakdown,  # Optionally set hover data
+        size_max=60  # Adjust the max size to fit your design
+
+    )
+
+    # Enhance layout
+    fig.update_layout(
+        xaxis_title=x_axis,
+        yaxis_title=y_axis,
+        legend_title=color_breakdown,
+        plot_bgcolor='white',  # Set background color to white
+        paper_bgcolor='white',  # Set the area around the graph to white
+        margin=dict(l=0, r=0, t=20, b=0),
+        xaxis=dict(
+            showline=True,  # Show x-axis line
+            showgrid=False,  # Hide grid lines
+            linecolor='black',  # x-axis line color
+        ),
+
+        yaxis=dict(
+            showline=True,  # Show y-axis line
+            showgrid=False,  # Hide grid lines
+            linecolor='black',  # y-axis line color
+        ),
+        title={
+            'text': f"Bubble Chart of {size_metric} by {color_breakdown}",
+            'y': 0.97,
+            'x': 0.5,
+            'xanchor': 'center',
+            'yanchor': 'top'},
+        titlefont={'size': 15}
+    )
+
+    return fig

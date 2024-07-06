@@ -14,7 +14,7 @@ from index import app
 
 from Functions.data_loader import load_and_preprocess_data, add_week_and_quarter
 from Functions.USA_map import state_codes
-from Functions.graph_page_functions import metrics_options, granularity_options, breakdown_options, filter_data, aggregate_data_for_timeline_graph, bubble_chart_dataframe
+from Functions.graph_page_functions import metrics_options, granularity_options, breakdown_options, filter_data, aggregate_data_for_timeline_graph, bubble_chart_dataframe, create_bubble_chart, create_combined_date_column, create_line_chart
 
 # File path to the Excel file
 file_path = 'assets/Sample - Superstore.xlsx'
@@ -29,107 +29,125 @@ metrics_list = ['Days to Ship', 'Discount',
 
 graph_page_layout = html.Div([
     dbc.Row([
-        dbc.Col([
-            html.Label('Start Date:', className='date-label'),
-            dcc.DatePickerSingle(
-                id='start-date-picker',
-                date=sales_data['Order Date'].min(),
-                display_format='MMM D, YYYY'
-            )
-        ], width=3),
-
-        dbc.Col([
-            html.Label('End Date:', className='date-label'),
-            dcc.DatePickerSingle(
-                id='end-date-picker',
-                date=sales_data['Order Date'].max(),
-                display_format='MMM D, YYYY'
-            )
-        ], width=3),
 
         dbc.Col([
             dbc.Row([
-                dbc.Col([
-                    html.Label('Select Granularity:', className='date-label')
-                ], width=4),  # Adjust width as needed for the label
-                dbc.Col([
-                    dcc.Dropdown(
-                        id='granularity-selector',
-                        options=granularity_options,
-                        value='Month'  # Default value
-                    )
-                ], width=8)  # Adjust width as needed for the dropdown
-            ])
-        ], width=3),
+                html.Label('Start Date:', className='linechart-input-label',
+                           )]),
+            dbc.Row([
+                dcc.DatePickerSingle(
+                    id='start-date-picker',
+                    date=sales_data['Order Date'].min(),
+                    display_format='MMM D, YYYY',
+                    className='custom-datepicker'
+                )
+            ], className='linechart-input-field')
+        ], width=3, className='linechart-input-container'),
+
 
         dbc.Col([
             dbc.Row([
-                dbc.Col([
-                    html.Label('Select Metric:', className='date-label')
-                ], width=4),  # Adjust width as needed for the label
-                dbc.Col([
-                    dcc.Dropdown(
-                        id='metric-selector',
-                        options=metrics_options,
-                        value='Profit'  # Default value
-                    )
-                ], width=8)  # Adjust width as needed for the dropdown
-            ])
-        ], width=3),
+                html.Label('End Date:', className='linechart-input-label',
+                           )]),
+            dbc.Row([
+                dcc.DatePickerSingle(
+                    id='end-date-picker',
+                    date=sales_data['Order Date'].max(),
+                    display_format='MMM D, YYYY',
+                    className='custom-datepicker'
+                )
+            ], className='linechart-input-field')
+            # Padding around the column content
+        ], width=3, className='linechart-input-container'),
 
-    ]),
+
+
+
+
+        dbc.Col([
+            dbc.Row([
+                html.Label('Select Period:', className='linechart-input-label',
+                           )]),
+            dbc.Row([
+                dcc.Dropdown(
+                    id='granularity-selector',
+                    options=granularity_options,
+                    value='Quarter',  # Default value
+                )], className='linechart-input-field')
+            # Padding around the column content
+        ], width=3, className='linechart-input-container'),
+
+        dbc.Col([
+            dbc.Row([
+                html.Label('Select Metric:', className='linechart-input-label',
+                           )]),
+            dbc.Row([
+                dcc.Dropdown(
+                    id='metric-selector',
+                    options=metrics_options,
+                    value='Sales',  # Default value
+                )], className='linechart-input-field')
+            # Padding around the column content
+        ], width=3, className='linechart-input-container')
+
+
+
+    ], className='timeline-chart-input-row'),
 
     dbc.Row([
-        dbc.Col([], width=5),
-        dbc.Col([], width=5),
+        dbc.Col(
+            [dcc.Graph(id='timeline-chart', config={'displayModeBar': False})], className='graph-page-chart', width=5),
+        dbc.Col(
+            [dcc.Graph(id='bubble-chart', config={'displayModeBar': False})], className='graph-page-chart', width=5),
 
 
         dbc.Col([
             dbc.Row([dbc.Row([
-                    html.Label('X-Axis', className='date-label')
+                    html.Label('X-Axis:', className='bubble-chart-input-label')
                     ]),
                 dbc.Row([
                     dcc.Dropdown(
                         id='x-axis-dropdown',
                         options=metrics_options,
-                        value="Sales"
+                        value="Profit"
                     ),
                 ])
-            ]),
+            ], className='bubble-chart-input-container'),
 
             dbc.Row([dbc.Row([
-                    html.Label('Y-Axis', className='date-label')
+                    html.Label('Y-Axis:', className='bubble-chart-input-label')
                     ]),
                 dbc.Row([
                     dcc.Dropdown(
                         id='y-axis-dropdown',
                         options=metrics_options,
-                        value="Profit"
+                        value="Profit Ratio"
                     ),
                 ])
+            ], className='bubble-chart-input-container'),
 
-            ]),
             dbc.Row([
                 dbc.Row([
-                    html.Label('Breakdown:', className='date-label')
+                    html.Label(
+                        'Breakdown:', className='bubble-chart-input-label')
                 ]),
                 dbc.Row([
                     dcc.Dropdown(
                         id='breakdown',
                         options=breakdown_options,
-                        value="Category"
+                        value="Sub-Category"
                     ),
                 ])
-            ]),
+            ], className='bubble-chart-input-container'),
 
-        ], width=2)
+        ], className='bubble-chart-control', width=2)
 
-    ])
+    ], className='graphpage-graph-row')
 ])
 
 
 @app.callback(
-
+    Output('timeline-chart', 'figure'),
     [
         Input('start-date-picker', 'date'),
         Input('end-date-picker', 'date'),
@@ -148,7 +166,13 @@ def update_timeline_graph(start_date, end_date, granularity, selected_metric):
     time_line_df = aggregate_data_for_timeline_graph(
         filtered_data, agg_list, selected_metric)
 
+    time_line_df = create_combined_date_column(time_line_df)
+
+    timeline_chart_fig = create_line_chart(time_line_df, selected_metric)
+
     print(time_line_df)
+
+    return timeline_chart_fig
 
 
 @app.callback(
@@ -174,7 +198,7 @@ def update_dropdowns(x_selected, y_selected):
 
 
 @app.callback(
-
+    Output('bubble-chart', 'figure'),
     [
         Input('start-date-picker', 'date'),
         Input('end-date-picker', 'date'),
@@ -190,3 +214,7 @@ def update_bubble_chart(start_date, end_date, selected_metric, x_axis, y_axis, b
 
     print("This is the bubble chart dataframe:")
     print(bubble_chart_df)
+    bubble_chart_fig = create_bubble_chart(
+        bubble_chart_df, x_axis, y_axis, selected_metric, breakdown)
+
+    return bubble_chart_fig
