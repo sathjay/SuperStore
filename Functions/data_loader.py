@@ -13,7 +13,7 @@ def load_and_preprocess_data(file_path):
     df['Ship Date'] = pd.to_datetime(df['Ship Date'])
 
     df['Sales'] = df['Sales'].astype(float).round(2)
-    df['Discount'] = df['Discount'].astype(float).round(2)
+    df['Discount'] = (df['Discount'].astype(float) * 100).round(2)
     df['Profit'] = df['Profit'].astype(float).round(2)
     df['Quantity'] = df['Quantity'].astype(int)
 

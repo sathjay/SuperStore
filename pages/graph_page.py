@@ -14,7 +14,7 @@ from index import app
 
 from Functions.data_loader import load_and_preprocess_data, add_week_and_quarter
 from Functions.USA_map import state_codes
-from Functions.graph_page_functions import metrics_options, granularity_options, breakdown_options, filter_data, get_groupby_columns, aggregate_data
+from Functions.graph_page_functions import metrics_options, granularity_options, breakdown_options, filter_data, aggregate_data_for_timeline_graph, bubble_chart_dataframe
 
 # File path to the Excel file
 file_path = 'assets/Sample - Superstore.xlsx'
@@ -23,6 +23,8 @@ sales_data, unique_years = load_and_preprocess_data(
     file_path)
 # Add 'Week' and 'Quarter' columns
 sales_data_with_q_info = add_week_and_quarter(sales_data)
+metrics_list = ['Days to Ship', 'Discount',
+                'Profit', 'Quantity', 'Sales', 'Returned']
 
 
 graph_page_layout = html.Div([
@@ -75,6 +77,52 @@ graph_page_layout = html.Div([
             ])
         ], width=3),
 
+    ]),
+
+    dbc.Row([
+        dbc.Col([], width=5),
+        dbc.Col([], width=5),
+
+
+        dbc.Col([
+            dbc.Row([dbc.Row([
+                    html.Label('X-Axis', className='date-label')
+                    ]),
+                dbc.Row([
+                    dcc.Dropdown(
+                        id='x-axis-dropdown',
+                        options=metrics_options,
+                        value="Sales"
+                    ),
+                ])
+            ]),
+
+            dbc.Row([dbc.Row([
+                    html.Label('Y-Axis', className='date-label')
+                    ]),
+                dbc.Row([
+                    dcc.Dropdown(
+                        id='y-axis-dropdown',
+                        options=metrics_options,
+                        value="Profit"
+                    ),
+                ])
+
+            ]),
+            dbc.Row([
+                dbc.Row([
+                    html.Label('Breakdown:', className='date-label')
+                ]),
+                dbc.Row([
+                    dcc.Dropdown(
+                        id='breakdown',
+                        options=breakdown_options,
+                        value="Category"
+                    ),
+                ])
+            ]),
+
+        ], width=2)
 
     ])
 ])
@@ -94,12 +142,51 @@ def update_timeline_graph(start_date, end_date, granularity, selected_metric):
     print(type(selected_metric), type(start_date),
           type(end_date), type(granularity))
 
-    filtered_data = filter_data(
+    filtered_data, agg_list = filter_data(
         sales_data_with_q_info, start_date, end_date, selected_metric, granularity)
 
-    groupby_columns = get_groupby_columns(filtered_data, selected_metric)
+    time_line_df = aggregate_data_for_timeline_graph(
+        filtered_data, agg_list, selected_metric)
 
-    aggregate_data_for_chart = aggregate_data(
-        filtered_data, groupby_columns, selected_metric)
+    print(time_line_df)
 
-    print(aggregate_data_for_chart)
+
+@app.callback(
+    [Output('x-axis-dropdown', 'options'),
+     Output('y-axis-dropdown', 'options')],
+    [Input('x-axis-dropdown', 'value'),
+     Input('y-axis-dropdown', 'value')]
+)
+def update_dropdowns(x_selected, y_selected):
+    if x_selected:
+        y_options = [
+            option for option in metrics_options if option['value'] != x_selected]
+    else:
+        y_options = metrics_options
+
+    if y_selected:
+        x_options = [
+            option for option in metrics_options if option['value'] != y_selected]
+    else:
+        x_options = metrics_options
+
+    return x_options, y_options
+
+
+@app.callback(
+
+    [
+        Input('start-date-picker', 'date'),
+        Input('end-date-picker', 'date'),
+        Input('metric-selector', 'value'),
+        Input('x-axis-dropdown', 'value'),
+        Input('y-axis-dropdown', 'value'),
+        Input('breakdown', 'value'),
+    ])
+def update_bubble_chart(start_date, end_date, selected_metric, x_axis, y_axis, breakdown):
+
+    bubble_chart_df = bubble_chart_dataframe(
+        sales_data, start_date, end_date, selected_metric, metrics_list, breakdown)
+
+    print("This is the bubble chart dataframe:")
+    print(bubble_chart_df)
