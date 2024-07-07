@@ -264,7 +264,7 @@ def create_indicator(value, delta, title, is_currency=False, is_percentage=False
     ))
 
     fig.update_layout(
-        height=85,
+        height=80,
         margin={'l': 10, 'r': 10, 't': 26, 'b': 10},
         paper_bgcolor="white",
         title={

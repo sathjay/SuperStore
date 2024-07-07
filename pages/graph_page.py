@@ -9,7 +9,6 @@ import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-
 from index import app
 
 from Functions.data_loader import load_and_preprocess_data, add_week_and_quarter
@@ -44,7 +43,6 @@ graph_page_layout = html.Div([
             ], className='linechart-input-field')
         ], width=3, className='linechart-input-container'),
 
-
         dbc.Col([
             dbc.Row([
                 html.Label('End Date:', className='linechart-input-label',
@@ -59,10 +57,6 @@ graph_page_layout = html.Div([
             ], className='linechart-input-field')
             # Padding around the column content
         ], width=3, className='linechart-input-container'),
-
-
-
-
 
         dbc.Col([
             dbc.Row([
@@ -91,7 +85,6 @@ graph_page_layout = html.Div([
         ], width=3, className='linechart-input-container')
 
 
-
     ], className='timeline-chart-input-row'),
 
     dbc.Row([
@@ -99,7 +92,6 @@ graph_page_layout = html.Div([
             [dcc.Graph(id='timeline-chart', config={'displayModeBar': False})], className='graph-page-chart', width=5),
         dbc.Col(
             [dcc.Graph(id='bubble-chart', config={'displayModeBar': False})], className='graph-page-chart', width=5),
-
 
         dbc.Col([
             dbc.Row([dbc.Row([

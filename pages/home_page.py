@@ -13,13 +13,11 @@ from Functions.data_loader import load_and_preprocess_data, add_week_and_quarter
 from Functions.USA_map import state_codes
 from Functions.home_page_functions import metric_dropdown, category_dropdown, update_title, update_map_title, update_metric_trends_title, selected_year_previous_year_data_of_state, aggregate_data_by_month, create_line_chart, aggregate_kpi_level, create_indicator, choropleth_dataframe, choropleth_map_creation
 
-
 # File path to the Excel file
 file_path = 'assets/Sample - Superstore.xlsx'
 # Load and preprocess the data
 sales_data, unique_years = load_and_preprocess_data(
     file_path)
-
 
 home_page_layout = html.Div([
 
@@ -35,7 +33,6 @@ home_page_layout = html.Div([
                 dbc.Col(html.Div([dcc.Graph(
                     id='choropleth-map', config={'displayModeBar': False})], className='map-container'), width=12)
             ], className='map-row'),
-
 
             dbc.Row([
                     dbc.Col(html.H3(id='summary-title',
@@ -154,6 +151,7 @@ def display_selected(year, metric, state_code):
     aggregated_kpi_data = aggregate_kpi_level(sales_data, state_code,)
     kpi_display_data = aggregated_kpi_data[aggregated_kpi_data['Year'] == year]
 
+    print(f'KPI data:\n{aggregated_kpi_data}')
     print(kpi_display_data)
 
     sales_kpi = create_indicator(kpi_display_data['Sales'].iloc[0],
@@ -170,6 +168,8 @@ def display_selected(year, metric, state_code):
 
     # Create choropleth map
     choropleth_data = choropleth_dataframe(sales_data, year)
+
+    print(f'Choropleth data:\n{choropleth_data}')
 
     choropleth_fig = choropleth_map_creation(choropleth_data, metric, year)
 

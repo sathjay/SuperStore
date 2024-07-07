@@ -12,7 +12,7 @@ external_stylesheets = [font_awesome1, font_awesome2,
 
 # create a Dash instance
 
-app = dash.Dash(__name__, title='SuperStore Data & Analytics', external_stylesheets=external_stylesheets,
+app = dash.Dash(__name__, title='SuperStore', external_stylesheets=external_stylesheets,
                 suppress_callback_exceptions=True)
 
 
