@@ -168,3 +168,55 @@
 .bubble-chart-input-label {
   margin-bottom: 10px;
 }
+
+.table-container {
+  overflow-x: scroll;
+}
+
+.table-display {
+  overflow-x: scroll;
+}
+
+.dash-spreadsheet-container {
+  height: 670px !important;
+  overflow-x: scroll;
+}
+.dash-spreadsheet-inner {
+  max-height: 670px !important;
+}
+.dash-spreadsheet.dash-freeze-top,
+dash-spreadsheet.dash-virtualized {
+  max-height: 670px !important;
+}
+.dash-spreadsheet.dash-freeze-top .dash-spreadsheet.dash-virtualized {
+  max-height: 670px !important;
+}
+
+.table-filter-row {
+  padding-bottom: 20px;
+  padding-left: 30px;
+  margin-top: 30px;
+  border-bottom: 1px solid grey;
+}
+
+.table-input-label {
+  margin-bottom: 10px;
+}
+
+.table-filter-container {
+  margin-bottom: 10px;
+}
+
+.data-entry-heading {
+  padding: 20px;
+  border-top: 1px solid grey;
+}
+
+.input-field-container {
+  padding-left: 40px;
+  padding-right: 40px;
+}
+.data-entry-row {
+  padding-top: 20px;
+  padding-bottom: 10px;
+}

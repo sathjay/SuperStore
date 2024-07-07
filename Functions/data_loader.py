@@ -68,3 +68,23 @@ def add_week_and_quarter(sales_data):
 
     sales_data.sort_values(by='Order Date', inplace=True)
     return sales_data
+
+
+def add_week_and_quarter_for_table_page(sales_data):
+    # Add 'Week' column using ISO week number
+    sales_data['Week'] = sales_data['Order Date'].dt.isocalendar().week
+
+    # Add 'Quarter' column
+    sales_data['Quarter'] = sales_data['Order Date'].dt.quarter
+
+    # Calculate the number of days to ship
+    sales_data['Days to Ship'] = (
+        sales_data['Ship Date'] - sales_data['Order Date']).dt.days
+
+    sales_data = sales_data.rename(columns={'Ship Mode': 'ShipMode',
+                                            'Customer Name': 'CustomerName',
+                                            'Sub-Category': 'SubCategory',
+                                            })
+
+    sales_data.sort_values(by='Order Date', inplace=True)
+    return sales_data

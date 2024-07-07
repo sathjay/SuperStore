@@ -315,7 +315,7 @@ def choropleth_map_creation(data, metric, year):
         hover_name='State',  # State names will appear in the tooltip
         hover_data=[metric],  # Additional data to appear in the tooltip
         locationmode='USA-states',  # Set the location mode to USA states
-        color_continuous_scale='BuGn',  # Color scale
+        color_continuous_scale='YlGnBu',  # Color scale
         scope='usa',  # Limit the map scope to the USA
         labels={metric: metric}  # Label for the color bar
     )
