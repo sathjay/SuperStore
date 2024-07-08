@@ -1,4 +1,3 @@
-
 import pandas as pd  # (version 1.0.0)
 import plotly  # (version 4.5.4) pip install plotly==4.5.4
 import plotly.express as px
@@ -7,7 +6,6 @@ from dash import dcc, html, dash_table
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
-from plotly.subplots import make_subplots
 
 from index import app
 

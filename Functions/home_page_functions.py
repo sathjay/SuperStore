@@ -2,7 +2,6 @@ import pandas as pd
 import plotly.express as px
 import calendar
 import plotly.graph_objects as go
-from plotly.subplots import make_subplots
 
 
 metric_dropdown = [
