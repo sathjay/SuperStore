@@ -67,6 +67,7 @@ graph_page_layout = html.Div([
                     id='granularity-selector',
                     options=granularity_options,
                     value='Quarter',  # Default value
+                    clearable=False
                 )], className='linechart-input-field')
             # Padding around the column content
         ], width=3, className='linechart-input-container'),
@@ -80,6 +81,7 @@ graph_page_layout = html.Div([
                     id='metric-selector',
                     options=metrics_options,
                     value='Sales',  # Default value
+                    clearable=False
                 )], className='linechart-input-field')
             # Padding around the column content
         ], width=3, className='linechart-input-container')
@@ -101,7 +103,8 @@ graph_page_layout = html.Div([
                     dcc.Dropdown(
                         id='x-axis-dropdown',
                         options=metrics_options,
-                        value="Profit"
+                        value="Profit",
+                        clearable=False
                     ),
                 ])
             ], className='bubble-chart-input-container'),
@@ -113,7 +116,8 @@ graph_page_layout = html.Div([
                     dcc.Dropdown(
                         id='y-axis-dropdown',
                         options=metrics_options,
-                        value="Profit Ratio"
+                        value="Profit Ratio",
+                        clearable=False
                     ),
                 ])
             ], className='bubble-chart-input-container'),
@@ -127,7 +131,8 @@ graph_page_layout = html.Div([
                     dcc.Dropdown(
                         id='breakdown',
                         options=breakdown_options,
-                        value="Sub-Category"
+                        value="Sub-Category",
+                        clearable=False
                     ),
                 ])
             ], className='bubble-chart-input-container'),
@@ -146,6 +151,7 @@ graph_page_layout = html.Div([
         Input('granularity-selector', 'value'),
         Input('metric-selector', 'value')])
 def update_timeline_graph(start_date, end_date, granularity, selected_metric):
+    '''Update the timeline graph based on the selected inputs.'''
     # Filter and prepare data based on the selected dates and other inputs
 
     print(selected_metric, start_date, end_date, granularity)
@@ -174,6 +180,7 @@ def update_timeline_graph(start_date, end_date, granularity, selected_metric):
      Input('y-axis-dropdown', 'value')]
 )
 def update_dropdowns(x_selected, y_selected):
+    '''Update the dropdown options based on the selected values.'''
     if x_selected:
         y_options = [
             option for option in metrics_options if option['value'] != x_selected]
@@ -200,6 +207,7 @@ def update_dropdowns(x_selected, y_selected):
         Input('breakdown', 'value'),
     ])
 def update_bubble_chart(start_date, end_date, selected_metric, x_axis, y_axis, breakdown):
+    '''Update the bubble chart based on the selected inputs.'''
 
     bubble_chart_df = bubble_chart_dataframe(
         sales_data, start_date, end_date, selected_metric, metrics_list, breakdown)

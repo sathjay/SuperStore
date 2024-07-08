@@ -18,6 +18,7 @@ breakdown_options = [{'label': break_down, 'value': break_down} for break_down i
 
 
 def filter_data(dataframe, start_date, end_date, selected_metric, selected_granularity):
+    '''Get the filtered dataframe based on the selected date range and granularity.'''
     # Convert start and end date strings to datetime objects
     start_date = pd.to_datetime(start_date)
     end_date = pd.to_datetime(end_date)
@@ -57,6 +58,7 @@ def filter_data(dataframe, start_date, end_date, selected_metric, selected_granu
 
 
 def aggregate_data_for_timeline_graph(final_filtered_df, group_by_list, selected_metric):
+    '''Aggregate the filtered data based on the selected metric and group by list.'''
     if selected_metric in ['Profit', 'Sales', 'Returned', 'Quantity']:
         # Perform group by and sum the selected metric
         aggregated_data = final_filtered_df.groupby(group_by_list).agg({
@@ -99,11 +101,7 @@ def aggregate_data_for_timeline_graph(final_filtered_df, group_by_list, selected
 
 def create_combined_date_column(dataframe):
     """
-    Dynamically create a 'Date' column in the dataframe based on available time components.
-
-    Args:
-    dataframe (DataFrame): The dataframe with potential columns 'Year', 'Month', 'Week', 'Quarter'.
-
+    Dynamically create a 'Date' column in the dataframe based on available time components in the dataframe
     Returns:
     DataFrame: The modified dataframe with a new 'Date' column.
     """
@@ -132,11 +130,6 @@ def create_combined_date_column(dataframe):
 def create_line_chart(dataframe, metric):
     """
     Creates a line chart with 'Date' on the x-axis and the specified metric on the y-axis.
-
-    Args:
-    dataframe (pd.DataFrame): The DataFrame containing the data to plot.
-    metric (str): The column name of the metric to plot on the y-axis.
-
     Returns:
     plotly.graph_objs.Figure: The figure object containing the line chart.
 
@@ -189,6 +182,7 @@ def create_line_chart(dataframe, metric):
 
 
 def bubble_chart_dataframe(dataframe, start_date, end_date, selected_metric, metric_list, breakdown):
+    '''Prepare the dataframe for the bubble chart based on the selected date range and metric.'''
     # Convert start and end dates to datetime objects
     start_date = pd.to_datetime(start_date)
     end_date = pd.to_datetime(end_date)
@@ -228,12 +222,15 @@ def bubble_chart_dataframe(dataframe, start_date, end_date, selected_metric, met
 
 
 def preprocess_data_for_bubble_chart(df, size_metric):
+    '''Preprocess the data for the bubble chart by ensuring all size values are positive.'''
     # Ensure all size values are positive; replace negative values with a small positive value
     df[size_metric] = df[size_metric].apply(lambda x: 0.2 if x < 0 else x)
     return df
 
 
 def create_bubble_chart(bubble_chart_df, x_axis, y_axis, size_metric, color_breakdown):
+    '''Create a bubble chart based on the provided data and parameters.
+    Returns: plotly.graph_objs.Figure: The figure object containing the bubble chart.'''
 
     # Preprocess the dataframe to adjust size metric values
     bubble_chart_df = preprocess_data_for_bubble_chart(

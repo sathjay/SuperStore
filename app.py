@@ -12,7 +12,7 @@ from pages.home_page import home_page_layout
 from pages.graph_page import graph_page_layout
 from pages.table_page import table_page_layout
 
-
+# Defining the header row layout
 header_row = dbc.Container([
     dbc.Row([
 
@@ -94,14 +94,14 @@ sidebar = html.Div(
                 dbc.NavLink([
                     html.I(className="fa-solid fa-table me-1"),
                     " Table "
-                ], href="/table", id="sidebar-table-link", active="exact"),
+                ],  href="/table", id="sidebar-table-link", active="exact"),
                 dbc.NavLink([
                     html.I(className="fa-solid fa-chart-line me-1"),
                     " Graph "
-                ], href="/graph", id="sidebar-graph-link", active="exact"),
+                ],  href="/graph", id="sidebar-graph-link", active="exact"),
             ],
             vertical=True,
-            pills=True,
+            pills=False,
         ),
     ], className="sidebar",
 
@@ -110,8 +110,8 @@ sidebar = html.Div(
 
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
-    header_row,
-    sidebar,
+    header_row,  # Header row is the same for all pages
+    sidebar,  # Sidebar is the same for all pages
     html.Div(id='layout-content', className='layout'),
 
 ],  className="mainContainer")
@@ -120,7 +120,8 @@ app.layout = html.Div([
 @app.callback(
     [Output("home-link", "className"),
      Output("table-link", "className"),
-     Output("graph-link", "className")],
+     Output("graph-link", "className")
+     ],
     [Input("url", "pathname")]
 )
 def update_active_link(pathname):
@@ -132,8 +133,10 @@ def update_active_link(pathname):
     # Set the active link based on the current pathname
     if pathname == "/":
         home_class = "card-title d-inline active-link"
+
     elif pathname == "/table":
         table_class = "card-title d-inline active-link"
+
     elif pathname == "/graph":
         graph_class = "card-title d-inline active-link"
 

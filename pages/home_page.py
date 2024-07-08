@@ -6,12 +6,12 @@ from dash import dcc, html, dash_table
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
-from plotly.subplots import make_subplots
+
 
 from index import app
-from Functions.data_loader import load_and_preprocess_data, add_week_and_quarter
+from Functions.data_loader import load_and_preprocess_data
 from Functions.USA_map import state_codes
-from Functions.home_page_functions import metric_dropdown, category_dropdown, update_title, update_map_title, update_metric_trends_title, selected_year_previous_year_data_of_state, aggregate_data_by_month, create_line_chart, aggregate_kpi_level, create_indicator, choropleth_dataframe, choropleth_map_creation
+from Functions.home_page_functions import metric_dropdown, update_kpi_title, update_map_title, update_metric_trends_title, selected_year_previous_year_data_of_state, aggregate_data_by_month, create_line_chart, aggregate_kpi_level, create_indicator, choropleth_dataframe, choropleth_map_creation
 
 # File path to the Excel file
 file_path = 'assets/Sample - Superstore.xlsx'
@@ -40,14 +40,14 @@ home_page_layout = html.Div([
                     ]),
 
             dbc.Row([
-                    dbc.Col(html.Div([dcc.Graph(id='sales-kpi')],
+                    dbc.Col(html.Div([dcc.Graph(id='sales-kpi', config={'displayModeBar': False})],
                                      className='graph-container'), width=3),
-                    dbc.Col(html.Div([dcc.Graph(id='quantity-kpi')],
+                    dbc.Col(html.Div([dcc.Graph(id='quantity-kpi', config={'displayModeBar': False})],
                                      className='graph-container'), width=3),
-                    dbc.Col(html.Div([dcc.Graph(id='profit-kpi')],
+                    dbc.Col(html.Div([dcc.Graph(id='profit-kpi', config={'displayModeBar': False})],
                                      className='graph-container'), width=3),
-                    dbc.Col(html.Div([dcc.Graph(id='margin-kpi')],
-                                     className='graph-container'), width=3),
+                    dbc.Col(html.Div([dcc.Graph(id='margin-kpi', config={'displayModeBar': False}),],
+                                     className='graph-container',), width=3),
                     ], className='graph-row'),
 
             dbc.Row([
@@ -76,6 +76,7 @@ home_page_layout = html.Div([
                 options=[{'label': str(year), 'value': year}
                          for year in unique_years],
                 value=max(unique_years),
+                clearable=False,
                 className='dropdown-style'
             ),
             html.Label("Select Metric", className="dropdown-label"),
@@ -83,6 +84,7 @@ home_page_layout = html.Div([
                 id='metric-dropdown',
                 options=metric_dropdown,
                 value='Profit',
+                clearable=False,
                 className='dropdown-style'
             ),
             html.Label("Select State", className="dropdown-label"),
@@ -91,6 +93,7 @@ home_page_layout = html.Div([
                 options=[{'label': state, 'value': code}
                          for state, code in state_codes.items()],
                 value=next(iter(state_codes.values())),
+                clearable=False,
                 className='dropdown-style'
             ),
         ], className='control-column', width=2)
@@ -119,6 +122,7 @@ home_page_layout = html.Div([
 
 )
 def display_selected(year, metric, state_code):
+    '''Display the selected data based on the filters. This will generate the map, KPIs, and trend graphs.'''
 
     print(f'Year: {year}, State: {state_code}')
     print(f'Type of year: {type(year)}, Type of state: {type(state_code)}')
@@ -126,12 +130,14 @@ def display_selected(year, metric, state_code):
     current_data, previous_data = selected_year_previous_year_data_of_state(
         sales_data, year, state_code, unique_years)
 
+    # Aggregate data by month for the trend graphs
     aggregated_current = aggregate_data_by_month(current_data)
     aggregated_previous = aggregate_data_by_month(
         previous_data) if previous_data is not None else None
 
-    summary_title = update_title(year, state_code)
+    # Title updates
     map_title = update_map_title(year, metric)
+    kpi_title = update_kpi_title(year, state_code)
     trend_graph_title = update_metric_trends_title(year, state_code)
 
     # Create charts
@@ -148,6 +154,7 @@ def display_selected(year, metric, state_code):
     print("********************************")
     print(f'Previous data:\n {aggregated_previous}')
 
+    # Aggregate KPI data
     aggregated_kpi_data = aggregate_kpi_level(sales_data, state_code,)
     kpi_display_data = aggregated_kpi_data[aggregated_kpi_data['Year'] == year]
 
@@ -173,4 +180,4 @@ def display_selected(year, metric, state_code):
 
     choropleth_fig = choropleth_map_creation(choropleth_data, metric, year)
 
-    return map_title, choropleth_fig, summary_title, sales_kpi, quantity_kpi, profit_kpi, margin_kpi, trend_graph_title, sales_chart, quantity_chart, profit_chart, margin_chart
+    return map_title, choropleth_fig, kpi_title, sales_kpi, quantity_kpi, profit_kpi, margin_kpi, trend_graph_title, sales_chart, quantity_chart, profit_chart, margin_chart

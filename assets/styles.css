@@ -10,8 +10,8 @@
 .header-row {
   background-color: #00005f;
   color: white;
-  margin-left: 3.6%;
-  margin-right: 3.6%;
+  margin-left: 4.6%;
+  margin-right: 4.6%;
 }
 
 .sidebar {
@@ -23,8 +23,8 @@
 }
 
 .layout {
-  margin-left: 5%;
-  margin-right: 5%;
+  margin-left: 6%;
+  margin-right: 6%;
 }
 
 .card {
@@ -55,7 +55,7 @@
 }
 
 .active-link {
-  color: darkblue; /* or any color you prefer for the active link */
+  color: blue; /* or any color you prefer for the active link */
 }
 
 .inactive-link {
@@ -184,6 +184,10 @@
 .table-display {
   overflow-x: scroll;
 }
+.table-heading-row {
+  margin-top: 8px;
+  text-align: center;
+}
 
 .dash-spreadsheet-container {
   height: 670px !important;
@@ -201,22 +205,23 @@ dash-spreadsheet.dash-virtualized {
 }
 
 .table-filter-row {
-  padding-bottom: 20px;
+  padding-bottom: 15px;
   padding-left: 30px;
-  margin-top: 30px;
+  margin-top: 10px;
   border-bottom: 1px solid grey;
 }
 
 .table-input-label {
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 
 .table-filter-container {
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 
 .data-entry-heading {
-  padding: 20px;
+  text-align: center;
+  padding: 12px;
   border-top: 1px solid grey;
 }
 
@@ -229,16 +234,19 @@ dash-spreadsheet.dash-virtualized {
   padding-bottom: 10px;
 }
 
-.data-entry-message-row {
-  padding-top: 20px;
-  padding-bottom: 40px;
-}
-
 .input-label {
   text-align: center;
 }
 
 .button-container {
-  padding-top: 37px;
+  padding-top: 38px;
   padding-left: 35px;
+}
+
+.data-entry-message-container {
+  margin-top: 20px;
+  padding-left: 40px;
+  padding-right: 40px;
+  height: 50px;
+  border-bottom: 1px solid grey;
 }

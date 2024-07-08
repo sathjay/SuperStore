@@ -3,6 +3,7 @@ from Functions.USA_map import state_codes
 
 
 def load_and_preprocess_data(file_path):
+    '''Load the data from the Excel file and preprocess it. Return the data and unique years list'''
     # Load the data
     df = pd.read_excel(file_path, sheet_name='Orders')
     df_return = pd.read_excel(file_path, sheet_name='Returns')
@@ -56,6 +57,7 @@ def load_and_preprocess_data(file_path):
 
 
 def add_week_and_quarter(sales_data):
+    '''Add Week' and Quarter columns to the DataFrame. Return the updated DataFrame.'''
     # Add 'Week' column using ISO week number
     sales_data['Week'] = sales_data['Order Date'].dt.isocalendar().week
 
@@ -71,6 +73,9 @@ def add_week_and_quarter(sales_data):
 
 
 def add_week_and_quarter_for_table_page(sales_data):
+    '''Add Week and Quarter columns to the DataFrame. Return the updated DataFrame.
+    The Columns Ship Mode, Customer Name, and Sub-Category are renamed to ShipMode, CustomerName, and SubCategory respectively.'''
+
     # Add 'Week' column using ISO week number
     sales_data['Week'] = sales_data['Order Date'].dt.isocalendar().week
 

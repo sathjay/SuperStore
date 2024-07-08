@@ -13,34 +13,33 @@ metric_dropdown = [
 
 ]
 
-category_dropdown = [
-    {'label': 'Customer', 'value': 'Customer Name'},
-    {'label': 'State', 'value': 'State'},
-    {'label': 'City', 'value': 'City'},
-    {'label': 'Sub-Category', 'value': 'Sub-Category'},
-    {'label': 'Product', 'value': 'Product Name'}
-]
-
-
-def update_title(selected_year, selected_state=None):
-    if selected_year is not None:
-        return f"{selected_year} SuperStore Metric for {selected_state}"
-    return "SuperStore Executive Summary"
-
 
 def update_map_title(selected_year, metric):
+    '''Function to update the map title based on the selected year and metric'''
     if selected_year is not None:
         return f"{selected_year} {metric} Overview by US States"
     return "Overview by States"
 
 
+def update_kpi_title(selected_year, selected_state=None):
+    '''Function to update the KPI title based on the selected year and state'''
+
+    if selected_year is not None:
+        return f"{selected_year} SuperStore Metric for {selected_state}"
+    return "SuperStore Executive Summary"
+
+
 def update_metric_trends_title(selected_year, selected_state=None):
+    '''Function to update the metric trends title based on the selected year and state'''
+
     if selected_year is not None:
         return f"{selected_year} Metric trends for {selected_state}"
     return "Metric trends"
 
 
 def selected_year_previous_year_data_of_state(df, selected_year, selected_state, unique_years):
+    '''Function to filter data for the selected year and state, and the previous year if available'''
+
     # Filter data for the selected year
     selected_year = int(selected_year)
 
@@ -65,6 +64,8 @@ def selected_year_previous_year_data_of_state(df, selected_year, selected_state,
 
 
 def aggregate_data_by_month(df):
+    '''Function to aggregate data by Month for a selected year and calculate profit margin'''
+
     if df.empty:
         return pd.DataFrame()  # Return an empty DataFrame if the input is empty
 
@@ -88,21 +89,20 @@ def aggregate_data_by_month(df):
 
     # Sorting by 'Year' and 'Month' to ensure the output is in chronological order
     # Ensure sorting takes the actual month sequence into account if necessary
-    month_to_num = {name: num for num,
-                    name in enumerate(calendar.month_abbr) if name}
+
     aggregated_data['Month'] = pd.Categorical(aggregated_data['Month'],
                                               categories=list(
                                                   calendar.month_abbr[1:]),
                                               ordered=True)
+
     aggregated_data.sort_values(by=['Year', 'Month'], inplace=True)
 
     return aggregated_data
 
 
 def fill_missing_months(data):
-
-    # Added this function beacuse the data was not being displayed correctly
-    # Line Chart was not able to display the data correctly with missing months.
+    '''Function to fill missing months in the data with 0 values for Sales, Quantity, and Profit.
+    This is added bacause the Plotly Line Chart was not able to display the data correctly with missing months.'''
 
     month_names = {
         1: 'Jan', 2: 'Feb', 3: 'Mar', 4: 'Apr',
@@ -125,6 +125,10 @@ def fill_missing_months(data):
 
 
 def create_line_chart(current_data, previous_data, metric):
+    '''Function to create two line chart for the selected metric over time if data is available.
+    The function also fills missing months in the data with 0 values for Sales, Quantity, and Profit.
+    This is added bacause the Plotly Line Chart was not able to display the data correctly with missing months.
+    '''
 
     current_data = fill_missing_months(current_data)
     previous_data = fill_missing_months(
@@ -203,6 +207,8 @@ def create_line_chart(current_data, previous_data, metric):
 
 # Aggregate data at the country level
 def aggregate_kpi_level(data, state_code):
+    '''Function to aggregate KPI data at the country or state level based on the selected state code.'''
+
     # Use the entire dataset if 'USA', otherwise filter by state code
     df = data if state_code == 'USA' else data[data['State Code'] == state_code]
 
@@ -240,6 +246,7 @@ def aggregate_kpi_level(data, state_code):
 
 
 def create_indicator(value, delta, title, is_currency=False, is_percentage=False):
+    '''Function to create a KPI indicator with the value, delta, and title provided.'''
 
     fig = go.Figure()
 
@@ -281,6 +288,7 @@ def create_indicator(value, delta, title, is_currency=False, is_percentage=False
 
 
 def choropleth_dataframe(sales_data, selected_year):
+    '''Function to prepare data for choropelth map. This will aggregate data by State and State Code for the selected year and calculate Profit Margin.'''
     # Step 1: Filter the data for the selected year
     filtered_data = sales_data[sales_data['Year'] == selected_year]
 
@@ -304,6 +312,7 @@ def choropleth_dataframe(sales_data, selected_year):
 
 
 def choropleth_map_creation(data, metric, year):
+    '''Function to create a choropleth map for the selected metric and year.'''
     # Optionally preprocess data if necessary
 
     fig = go.Figure()
@@ -333,65 +342,6 @@ def choropleth_map_creation(data, metric, year):
         coloraxis_colorbar=dict(
             x=0.87  # Adjust this value as needed to move the color scale inward
         )
-    )
-
-    return fig
-
-
-def key_figures(sales_data, year, metric, category):
-
-    fig = go.Figure()
-    combined_data = pd.DataFrame()
-
-    # Step 1: Filter data for the selected year
-    filtered_data = sales_data[sales_data['Year'] == year]
-
-    columns_to_keep = ['Year', category, metric]
-    filtered_data = filtered_data[columns_to_keep]
-
-    # Step 2: Group by the category and sum the metric
-    grouped_data = filtered_data.groupby(category).agg({
-        metric: 'sum'
-    }).reset_index()
-
-    # Round the metric to the nearest integer
-    grouped_data[metric] = grouped_data[metric].round(0)
-
-    # Step 3: Sort the data by the metric to get top and bottom performers
-    top_performers = grouped_data.nlargest(5, metric)
-    bottom_performers = grouped_data.nsmallest(5, metric)
-
-    fig = go.Figure()
-
-    # Combine top and bottom for plotting
-    combined_data = pd.concat(
-        [top_performers, bottom_performers]).sort_values(by=metric)
-
-    # Step 4: Create a horizontal bar graph
-    fig = px.bar(combined_data, x=metric, y=category, orientation='v', color=metric, color_continuous_scale='BuGn',
-                 title=f"Top & Bottom 5 {category} in {year} by {metric}")
-
-    # Update layout for clarity
-    fig.update_layout(
-        yaxis=dict(categoryorder='total ascending',
-                   showline=True,  # Show y-axis line
-                   showgrid=False,
-                   ),
-        xaxis=dict(
-            showline=True,  # Show y-axis line
-            showgrid=False,
-        ),
-
-        xaxis_title=metric,
-        yaxis_title=category,
-        coloraxis_showscale=False,
-        plot_bgcolor='rgba(0,0,0,0)',  # Make background transparent
-        # Make the area around the graph transparent
-        paper_bgcolor='rgba(0,0,0,0)',
-        showlegend=False,  # Optionally hide the legend if not needed
-
-
-        xaxis_tickformat=',.2f'  # Format the metric values for better readability
     )
 
     return fig

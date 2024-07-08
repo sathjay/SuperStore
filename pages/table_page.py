@@ -10,20 +10,20 @@ from index import app
 
 from index import app
 from Functions.data_loader import load_and_preprocess_data, add_week_and_quarter_for_table_page
-from Functions.table_page_functions import create_query, filter_dataframe
+from Functions.table_page_functions import create_query, filter_dataframe, validation_and_display_message
 
 # File path to the Excel file
 file_path = 'assets/Sample - Superstore.xlsx'
 # Load and preprocess the data
 sales_data, unique_years = load_and_preprocess_data(
     file_path)
-# Add 'Week' and 'Quarter' columns
+# Add 'Week' and 'Quarter' columns. Columns are remaned here for df.query() to work
 sales_data_with_q_info = add_week_and_quarter_for_table_page(sales_data)
 
 
 table_page_layout = html.Div([
 
-    dbc.Row([html.P('SuperStore Data', className='table-heading')],
+    dbc.Row([html.P('SuperStore Data Table:', className='table-heading')],
             className='table-heading-row'),
 
     dbc.Row([
@@ -207,8 +207,9 @@ table_page_layout = html.Div([
     ], className='data-entry-row'),
 
     dbc.Row([
-        html.P(id='feedback-message', style={'color': 'red', 'margin': '10px'})], className='data-entry-message-row')
-
+        html.Div([
+            html.P(id='feedback-message', style={'color': 'red', 'margin': '10px'})])
+    ], className='data-entry-message-container')
 ])
 
 
@@ -225,6 +226,7 @@ table_page_layout = html.Div([
     ]
 )
 def update_dropdowns(selected_region, selected_state):
+    '''Update the dropdown options based on the selected region and state.'''
     if selected_region == None:
         # If "All" is selected in the region dropdown, disable state and city dropdowns and clear options
         return [], True, [], True
@@ -257,17 +259,18 @@ def update_dropdowns(selected_region, selected_state):
         Input('city-dropdown', 'value')],
 )
 def update_table(selected_segment, selected_category, selected_sub_category, selected_region, selected_state, selected_city):
+    '''Update the table based on the selected filters.'''
 
     print('Segment: {}, \nCategory: {}, \nSubCategory: {}, \nState: {}, \nRegion: {}, \nCity: {}'.format(
         selected_segment, selected_category, selected_sub_category, selected_region, selected_state, selected_city))
 
-    query = ''
-
+    query = ''  # Initialize query string
     query = create_query(selected_segment, selected_category,
                          selected_sub_category, selected_region, selected_state, selected_city)
 
     print(f'Query: {query}')
 
+    filtered_df = pd.DataFrame()  # Initialize an empty DataFrame
     filtered_df = filter_dataframe(sales_data_with_q_info, query)
 
     print(f'Filtered Data: {filtered_df.head()}')
@@ -288,26 +291,26 @@ def update_table(selected_segment, selected_category, selected_sub_category, sel
      State('input-price', 'value')],
     prevent_initial_call=True)
 def table_data_entry(n_clicks, order_id, customer_name, product, quantity, price):
+    '''Add new data to the table based on the input fields.'''
     print('Order ID: {}, Customer Name: {}, Product: {}, Quantity: {}, Price: {}'.format(
         order_id, customer_name, product, quantity, price))
 
     global sales_data_with_q_info
 
-    if not all([order_id, customer_name, product, quantity, price]):
-        return "Please fill in all fields to add a new entry."
+    ui_message, data_insert_flag = validation_and_display_message(
+        sales_data_with_q_info, order_id, customer_name, product, quantity, price)
 
-    new_row = {'Order ID': order_id, 'Customer Name': customer_name, 'Product': product,
-               'Quantity': quantity, 'Price': price}
+    if data_insert_flag == True:
 
-    # Check for duplicate Order ID
-    if sales_data_with_q_info['Order ID'].eq(order_id).any():
-        return f"Duplicate entry not added: Order ID {order_id} already exists."
+        new_row = {'Order ID': order_id, 'Customer Name': customer_name, 'Product': product,
+                   'Quantity': quantity, 'Price': price}
 
-    # Append to the dataframe
-    # Convert new row into a DataFrame to append
-    new_df = pd.DataFrame([new_row])
-    sales_data_with_q_info = pd.concat(
-        [sales_data_with_q_info, new_df], ignore_index=True)
+        # Append to the dataframe
+        # Convert new row into a DataFrame to append
+        new_df = pd.DataFrame([new_row])
+        sales_data_with_q_info = pd.concat(
+            [sales_data_with_q_info, new_df], ignore_index=True)
 
-    # Return a success message
-    return f"New entry added successfully for Order ID: {order_id}"
+        return ui_message
+
+    return ui_message
