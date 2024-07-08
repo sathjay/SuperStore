@@ -34,7 +34,7 @@ table_page_layout = html.Div([
                     style_table={'overflowX': 'auto'},
                     page_size=20,  # Number of rows per page
                     # Ensures cells are wide enough to show content
-                    style_cell={'minWidth': '100px',
+                    style_cell={'minWidth': '80px',
                                 'width': '100px', 'maxWidth': '200px'},
                     filter_action='native',  # Optional: enable filtering by column
                     sort_action='native',  # Optional: enable sorting
@@ -171,26 +171,31 @@ table_page_layout = html.Div([
 
     dbc.Row([
         dbc.Col([
+            html.P('Order ID:', className='input-label'),
             dbc.Input(id='input-order-id',
                       placeholder='Enter Order ID', type='text', className='input-field-class'),
         ], className='input-field-container', width=2),
 
         dbc.Col([
+            html.P('Customer Name:', className='input-label'),
             dbc.Input(id='input-customer-name',
                       placeholder='Enter Customer Name', type='text', className='input-field-class'),
 
         ], className='input-field-container', width=2),
         dbc.Col([
+            html.P('Product Name:', className='input-label'),
             dbc.Input(id='input-product',
                       placeholder='Enter Product Name', type='text', className='input-field-class'),
         ], className='input-field-container', width=2),
 
         dbc.Col([
+            html.P('Quantity:', className='input-label'),
             dbc.Input(id='input-quantity',
                       placeholder='Enter Quantity', type='text', className='input-field-class'),
         ], className='input-field-container', width=2),
 
         dbc.Col([
+            html.P('Price:', className='input-label'),
             dbc.Input(id='input-price',
                       placeholder='Enter Price', type='text', className='input-field-class'),
         ], className='input-field-container', width=2),

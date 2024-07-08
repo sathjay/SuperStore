@@ -10,13 +10,21 @@
 .header-row {
   background-color: #00005f;
   color: white;
-  margin-left: 5%;
-  margin-right: 5%;
+  margin-left: 3.6%;
+  margin-right: 3.6%;
+}
+
+.sidebar {
+  position: fixed;
+  top: 350px;
+  left: 0;
+  bottom: 0;
+  width: 3%;
 }
 
 .layout {
-  margin-left: 6.4%;
-  margin-right: 6.4%;
+  margin-left: 5%;
+  margin-right: 5%;
 }
 
 .card {
@@ -217,6 +225,20 @@ dash-spreadsheet.dash-virtualized {
   padding-right: 40px;
 }
 .data-entry-row {
-  padding-top: 20px;
+  padding-top: 15px;
   padding-bottom: 10px;
+}
+
+.data-entry-message-row {
+  padding-top: 20px;
+  padding-bottom: 40px;
+}
+
+.input-label {
+  text-align: center;
+}
+
+.button-container {
+  padding-top: 37px;
+  padding-left: 35px;
 }

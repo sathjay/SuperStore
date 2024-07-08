@@ -331,7 +331,7 @@ def choropleth_map_creation(data, metric, year):
         geo=dict(lakecolor='white'),
         margin={"r": 0, "t": 30, "l": 0, "b": 0},
         coloraxis_colorbar=dict(
-            x=0.85  # Adjust this value as needed to move the color scale inward
+            x=0.87  # Adjust this value as needed to move the color scale inward
         )
     )
 

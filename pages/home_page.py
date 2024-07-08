@@ -25,17 +25,17 @@ home_page_layout = html.Div([
 
         dbc.Col([
             dbc.Row([
-                html.H3(id='map-title',
+                html.H4(id='map-title',
                     children="Overview by State", className='title'),
             ]),
 
             dbc.Row([
                 dbc.Col(html.Div([dcc.Graph(
-                    id='choropleth-map', config={'displayModeBar': False})], className='map-container'), width=12)
+                    id='choropleth-map', config={'displayModeBar': False})], className='map-container'), width=12),
             ], className='map-row'),
 
             dbc.Row([
-                    dbc.Col(html.H3(id='summary-title',
+                    dbc.Col(html.H4(id='summary-title',
                                     children="SuperStore Executive Summary"), className='title', width=12)
                     ]),
 
@@ -51,7 +51,7 @@ home_page_layout = html.Div([
                     ], className='graph-row'),
 
             dbc.Row([
-                html.H3(id='trend-graph-title',
+                html.H4(id='trend-graph-title',
                     children="Metric trends", className='title'),
             ]),
 

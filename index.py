@@ -14,6 +14,3 @@ external_stylesheets = [font_awesome1, font_awesome2,
 
 app = dash.Dash(__name__, title='SuperStore', external_stylesheets=external_stylesheets,
                 suppress_callback_exceptions=True)
-
-
-server = app.server

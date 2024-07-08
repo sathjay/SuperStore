@@ -82,11 +82,36 @@ header_row = dbc.Container([
 
 ], fluid=True, className="Container")
 
+# Sidebar definition
+sidebar = html.Div(
+    [
+        dbc.Nav(
+            [
+                dbc.NavLink([
+                    html.I(className="fa-solid fa-home me-1"),
+                    " Home"
+                ], href="/", id="sidebar-home-link", active="exact"),
+                dbc.NavLink([
+                    html.I(className="fa-solid fa-table me-1"),
+                    " Table "
+                ], href="/table", id="sidebar-table-link", active="exact"),
+                dbc.NavLink([
+                    html.I(className="fa-solid fa-chart-line me-1"),
+                    " Graph "
+                ], href="/graph", id="sidebar-graph-link", active="exact"),
+            ],
+            vertical=True,
+            pills=True,
+        ),
+    ], className="sidebar",
+
+)
+
 
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
     header_row,
-
+    sidebar,
     html.Div(id='layout-content', className='layout'),
 
 ],  className="mainContainer")
@@ -137,4 +162,4 @@ def render_page_content(pathname):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=False)
