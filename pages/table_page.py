@@ -174,7 +174,8 @@ table_page_layout = html.Div([
             html.P('Order ID:', className='input-label'),
             dbc.Input(id='input-order-id',
                       placeholder='Enter Order ID', type='text', className='input-field-class'),
-            html.P('Note: Order ID should be unique.', className='input-note')
+            html.P('Note: New Order ID entered must be unique.',
+                   className='input-note')
         ], className='input-field-container', width=2),
 
         dbc.Col([
