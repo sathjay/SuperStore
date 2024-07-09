@@ -132,7 +132,9 @@ graph_page_layout = html.Div([
                         value="Sub-Category",
                         clearable=False
                     ),
-                ])
+                ]),
+                html.P('Note: The size of the bubbles represents the total value of selected metric from dropdown between the selected dates.',
+                       className='bubble-chart-note')
             ], className='bubble-chart-input-container'),
 
         ], className='bubble-chart-control', width=2)

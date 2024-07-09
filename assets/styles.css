@@ -177,6 +177,11 @@
   margin-bottom: 10px;
 }
 
+.bubble-chart-note {
+  padding-top: 10px;
+  font-size: 11px;
+}
+
 .table-container {
   overflow-x: scroll;
 }
@@ -236,6 +241,11 @@ dash-spreadsheet.dash-virtualized {
 
 .input-label {
   text-align: center;
+}
+
+.input-note {
+  padding-top: 10px;
+  font-size: 11px;
 }
 
 .button-container {
