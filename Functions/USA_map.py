@@ -138,4 +138,35 @@ def update_charts(selected_periods):
 
     return fig_rgi, fig_sog, fig_opportunity_lost
 
+
+# Calculate Seasonality Index and Standard Deviation
+seasonality_df = filtered_df.groupby('subcommodity_group_nm').apply(
+    lambda x: x.assign(
+        Average_Sales=x['Total Market Value'].mean(),
+        Seasonality_Index=x['Total Market Value'] / x['Total Market Value'].mean(),
+        Standard_Deviation=x['Total Market Value'].std(),
+        Coefficient_of_Variation=(x['Total Market Value'].std() / x['Total Market Value'].mean()) * 100,
+        Avg_Min_Sales_Per_Year=x.groupby(x['PeriodDate'].dt.year)['Total Market Value'].min().mean(),
+        Avg_Max_Sales_Per_Year=x.groupby(x['PeriodDate'].dt.year)['Total Market Value'].max().mean(),
+        Range_Percentage=(
+            (x.groupby(x['PeriodDate'].dt.year)['Total Market Value'].max().mean() -
+             x.groupby(x['PeriodDate'].dt.year)['Total Market Value'].min().mean()) /
+            x.groupby(x['PeriodDate'].dt.year)['Total Market Value'].mean().mean()
+        ) * 100
+    )
+).reset_index(drop=True)
+
+# Calculate Seasonality Score
+seasonality_df['Seasonality_Score'] = seasonality_df['Coefficient_of_Variation'] * seasonality_df['Range_Percentage']
+
+# Seasonality Metrics Table
+    seasonality_table = seasonality_df[['subcommodity_group_nm', 'Seasonality_Index', 'Standard_Deviation', 
+                                        'Coefficient_of_Variation', 'Avg_Min_Sales_Per_Year', 
+                                        'Avg_Max_Sales_Per_Year', 'Range_Percentage', 'Seasonality_Score']]
+    seasonality_table = seasonality_table.round(2)
+
+    data = seasonality_table.to_dict('records')
+    columns = [{'name': col, 'id': col} for col in seasonality_table.columns]
+
+
 '''
