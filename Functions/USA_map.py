@@ -169,4 +169,59 @@ seasonality_df['Seasonality_Score'] = seasonality_df['Coefficient_of_Variation']
     columns = [{'name': col, 'id': col} for col in seasonality_table.columns]
 
 
+import pandas as pd
+import numpy as np
+
+# Read the CSV file
+file_path = 'aldi_scg_grouped_df.csv'  # Ensure this file is in the same directory
+aldi_df = pd.read_csv(file_path)
+
+# Ensure correct datetime format
+aldi_df['PeriodDate'] = pd.to_datetime(aldi_df['PeriodDate'])
+
+# Sort by subcommodity_group_nm and PeriodDate
+aldi_df = aldi_df.sort_values(by=['subcommodity_group_nm', 'PeriodDate'])
+
+# Calculate Market Growth Rate
+aldi_df['Market Growth Rate'] = aldi_df.groupby('subcommodity_group_nm')['Total Market Value'].pct_change()
+
+# Calculate Expected ALDI Sales
+aldi_df['Expected ALDI Sales'] = aldi_df.groupby('subcommodity_group_nm')['sales_value ALDI'].shift(1) * (1 + aldi_df['Market Growth Rate'])
+
+# Calculate Opportunity Lost
+aldi_df['Opportunity Lost'] = aldi_df['Expected ALDI Sales'] - aldi_df['sales_value ALDI']
+aldi_df['Opportunity Lost'] = aldi_df['Opportunity Lost'].apply(lambda x: x if x > 0 else 0)
+
+# Pivot table for Heatmap
+heatmap_data = aldi_df.pivot_table(
+    index='subcommodity_group_nm',
+    columns=aldi_df['PeriodDate'].dt.strftime('%b-%Y'),
+    values='Opportunity Lost',
+    aggfunc='sum',
+    fill_value=0
+)
+
+# Add totals
+heatmap_data['Total'] = heatmap_data.sum(axis=1)
+heatmap_data.loc['Total'] = heatmap_data.sum(axis=0)
+
+# Save Heatmap Data as CSV
+heatmap_csv_path = 'opportunity_lost_heatmap.csv'
+heatmap_data.to_csv(heatmap_csv_path)
+
+# Create Ranking Table based on Opportunity Lost
+ranking_table = aldi_df.groupby('subcommodity_group_nm')['Opportunity Lost'].sum().reset_index()
+ranking_table = ranking_table.sort_values(by='Opportunity Lost', ascending=False)
+
+# Save Ranking Table as CSV
+ranking_csv_path = 'opportunity_lost_ranking.csv'
+ranking_table.to_csv(ranking_csv_path, index=False)
+
+print(f"Opportunity Lost Heatmap saved to {heatmap_csv_path}")
+print(f"Opportunity Lost Ranking Table saved to {ranking_csv_path}")
+
+
+
+
+
 '''
