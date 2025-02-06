@@ -64,6 +64,21 @@ list_of_states = list(state_codes.keys())
 
 '''
 
+yearly_columns = [
+    {"name": col, "id": col, "type": "numeric", "format": Format(group=Group.yes, precision=2)}
+    if col == 'Opportunity Lost' else {"name": col, "id": col}
+    for col in yearly_opportunity_loss.columns
+]
+
+# Apply formatting to Ranking Table
+ranking_columns = [
+    {"name": col, "id": col, "type": "numeric", "format": Format(group=Group.yes, precision=2)}
+    if col == 'Opportunity Lost' else {"name": col, "id": col}
+    for col in ranking_table.columns
+]
+
+
+
 import pandas as pd
 import dash
 from dash import dcc, html, dash_table
