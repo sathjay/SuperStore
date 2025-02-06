@@ -168,7 +168,6 @@ seasonality_df['Seasonality_Score'] = seasonality_df['Coefficient_of_Variation']
     data = seasonality_table.to_dict('records')
     columns = [{'name': col, 'id': col} for col in seasonality_table.columns]
 
-
 import pandas as pd
 import numpy as np
 
@@ -178,7 +177,6 @@ aldi_df = pd.read_csv(file_path)
 
 # Ensure correct datetime format
 aldi_df['PeriodDate'] = pd.to_datetime(aldi_df['PeriodDate'])
-
 
 # Sort by category_nm, commodity_group_nm, subcommodity_group_nm, and PeriodDate
 aldi_df = aldi_df.sort_values(by=['category_nm', 'commodity_group_nm', 'subcommodity_group_nm', 'PeriodDate'])
@@ -210,8 +208,11 @@ heatmap_data.loc['Total'] = heatmap_data.sum(axis=0)
 heatmap_csv_path = 'opportunity_lost_heatmap.csv'
 heatmap_data.to_csv(heatmap_csv_path)
 
-# Create Ranking Table based on Opportunity Lost
-ranking_table = aldi_df.groupby('subcommodity_group_nm')['Opportunity Lost'].sum().reset_index()
+# Filter data for the year 2024
+aldi_2024_df = aldi_df[aldi_df['PeriodDate'].dt.year == 2024]
+
+# Create Ranking Table based on Opportunity Lost in 2024
+ranking_table = aldi_2024_df.groupby('subcommodity_group_nm')['Opportunity Lost'].sum().reset_index()
 ranking_table = ranking_table.sort_values(by='Opportunity Lost', ascending=False)
 
 # Save Ranking Table as CSV
