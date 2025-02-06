@@ -63,6 +63,105 @@ list_of_states = list(state_codes.keys())
 
 
 '''
+
+import pandas as pd
+import dash
+from dash import dcc, html, dash_table
+import dash_bootstrap_components as dbc
+import plotly.graph_objects as go
+
+# Read data from pre-generated CSV files
+heatmap_csv_path = 'opportunity_lost_heatmap.csv'
+ranking_csv_path = 'opportunity_lost_ranking.csv'
+yearly_summary_csv_path = 'yearly_opportunity_summary.csv'
+
+# Load the data with multi-index
+heatmap_data = pd.read_csv(heatmap_csv_path, header=0)
+heatmap_data.set_index(['category_nm', 'commodity_group_nm', 'subcommodity_group_nm'], inplace=True)
+
+# Remove the 'Total' row and column if present
+heatmap_data = heatmap_data[heatmap_data.index.get_level_values('subcommodity_group_nm') != 'Total']
+date_columns = [col for col in heatmap_data.columns if col != 'Total']
+
+ranking_table = pd.read_csv(ranking_csv_path)
+yearly_opportunity_loss = pd.read_csv(yearly_summary_csv_path)
+
+# Simplify Y-axis labels to avoid redundancy
+def simplify_labels(index):
+    # Ensure the index is a tuple
+    if isinstance(index, str):
+        index = eval(index)  # Convert string to tuple if needed
+    cat, com, sub = index
+    if cat == com == sub:
+        return f"{sub}"
+    elif com == sub:
+        return f"{cat} - {sub}"
+    else:
+        return f"{cat} - {com} - {sub}"
+
+# Dash App Setup
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+
+app.layout = dbc.Container([
+    dbc.Row([
+        dbc.Col(html.H1("ALDI Opportunity Lost Dashboard", className="text-center text-primary mb-4"), width=12)
+    ]),
+
+    # Heatmap
+    dbc.Row([
+        dbc.Col(dcc.Graph(
+            id='opportunity-lost-heatmap',
+            figure=go.Figure(data=go.Heatmap(
+                z=heatmap_data[date_columns].values,
+                x=date_columns,
+                y=[simplify_labels(index) for index in heatmap_data.index],
+                colorscale='Reds',
+                colorbar_title='Opportunity Lost'
+            ))
+        ), width=12)
+    ]),
+
+    # Yearly Opportunity Lost List
+    dbc.Row([
+        dbc.Col([
+            html.H2("Yearly Opportunity Loss", className="text-center"),
+            dash_table.DataTable(
+                data=yearly_opportunity_loss.to_dict('records'),
+                columns=[{"name": col, "id": col} for col in yearly_opportunity_loss.columns],
+                style_table={'margin': '20px 0'},
+                style_cell={'textAlign': 'center'},
+                style_header={'backgroundColor': 'rgb(230, 230, 230)', 'fontWeight': 'bold'}
+            )
+        ], width=12)
+    ]),
+
+    # Ranking Table
+    dbc.Row([
+        dbc.Col([
+            html.H2("2024 Opportunity Lost Ranking", className="text-center"),
+            dash_table.DataTable(
+                data=ranking_table.to_dict('records'),
+                columns=[{"name": col, "id": col} for col in ranking_table.columns],
+                style_table={'margin': '20px 0'},
+                style_cell={'textAlign': 'center'},
+                style_header={'backgroundColor': 'rgb(230, 230, 230)', 'fontWeight': 'bold'}
+            )
+        ], width=12)
+    ])
+], fluid=True)
+
+if __name__ == '__main__':
+    app.run_server(debug=True)
+
+print(f"Opportunity Lost Heatmap loaded from {heatmap_csv_path}")
+print(f"Opportunity Lost Ranking Table loaded from {ranking_csv_path}")
+print(f"Yearly Opportunity Summary loaded from {yearly_summary_csv_path}")
+
+
+
+
+
+
 import pandas as pd
 import dash
 from dash import dcc, html, dash_table
