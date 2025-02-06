@@ -179,8 +179,9 @@ aldi_df = pd.read_csv(file_path)
 # Ensure correct datetime format
 aldi_df['PeriodDate'] = pd.to_datetime(aldi_df['PeriodDate'])
 
-# Sort by subcommodity_group_nm and PeriodDate
-aldi_df = aldi_df.sort_values(by=['subcommodity_group_nm', 'PeriodDate'])
+
+# Sort by category_nm, commodity_group_nm, subcommodity_group_nm, and PeriodDate
+aldi_df = aldi_df.sort_values(by=['category_nm', 'commodity_group_nm', 'subcommodity_group_nm', 'PeriodDate'])
 
 # Calculate Market Growth Rate
 aldi_df['Market Growth Rate'] = aldi_df.groupby('subcommodity_group_nm')['Total Market Value'].pct_change()
