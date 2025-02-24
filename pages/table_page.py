@@ -316,3 +316,164 @@ def table_data_entry(n_clicks, order_id, customer_name, product, quantity, price
         return ui_message
 
     return ui_message
+'''
+import dash
+import dash_bootstrap_components as dbc
+import dash_html_components as html
+from dash import dcc
+from dash.dependencies import Input, Output
+from components.sidebar import sidebar  # Import sidebar component
+
+# Initialize Dash app
+app = dash.Dash(
+    external_stylesheets=[
+        dbc.icons.FONT_AWESOME,
+        dbc.icons.BOOTSTRAP,
+        dbc.themes.BOOTSTRAP,
+        'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css'
+    ],
+    assets_folder='assets',
+    use_pages=True,
+    pages_folder='pages',
+    suppress_callback_exceptions=True
+)
+
+# Define layout
+app.layout = html.Div([
+    sidebar,  # Sidebar imported from components
+    # Page content container
+    html.Div([dash.page_container], className='page_content')
+], className='full_page')
+
+# Run app
+if __name__ == "__main__":
+    app.run_server(debug=True)
+
+
+
+import dash_bootstrap_components as dbc
+import dash_html_components as html
+
+# Define icons and URLs
+tabs = [
+    {"icon": "fas fa-home fa-lg", "label": "Home", "href": "/"},
+    {"icon": "fas fa-database fa-lg", "label": "NielsenIQ Data", "href": "/nielseniq"},
+    {"icon": "fas fa-sort-amount-down fa-lg",
+        "label": "Category Ranking", "href": "/category-ranking"},
+    {"icon": "fas fa-tags fa-lg", "label": "Brand Ranking", "href": "/brand-ranking"},
+    {"icon": "fas fa-box-open fa-lg",
+        "label": "Product Ranking", "href": "/product-ranking"},
+    {"icon": "fas fa-coins fa-lg", "label": "Financial Projection",
+        "href": "/financial-projection"}
+]
+
+# Sidebar layout
+sidebar = html.Div([
+    # Placeholder for ALDI Internal Division Logo
+    html.Div("ALDI Internal Logo", className='logo-placeholder'),
+
+    # App Name
+    html.H4("Private Label vs Brands", className="app-title"),
+
+    # Navigation Menu
+    dbc.Nav([
+        dbc.NavLink(
+            dbc.Row([
+                dbc.Col(html.I(className=tab["icon"]),
+                        width=3, className='nav-icon'),
+                dbc.Col(tab["label"], width=9, className='nav-text')
+            ], align='center', className='nav-row'),
+            href=tab["href"], active="exact"
+        ) for tab in tabs
+    ], vertical=True, pills=True, className="nav-menu"),
+
+    # Placeholder for ALDI Corporate Logo
+    html.Div("ALDI Corporate Logo", className='logo-placeholder-bottom')
+], className='sidebar')
+
+
+/* Full page layout */
+.full_page {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  margin: 0;
+  padding: 0;
+}
+
+/* Sidebar styling */
+.sidebar {
+  width: 8%;
+  height: 100vh;
+  background-color: #e9ecef; /* Light grey */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 0px;
+  position: fixed;
+  left: 0;
+  top: 0;
+}
+
+/* Placeholder logos */
+.logo-placeholder,
+.logo-placeholder-bottom {
+  width: 100%;
+  height: 80px;
+  background-color: #d6d6d6; /* Placeholder color */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+/* App title styling */
+.app-title {
+  font-size: 14px;
+  text-align: center;
+  font-weight: bold;
+  padding: 10px 0;
+}
+
+/* Navigation menu */
+.nav-menu {
+  flex-grow: 1;
+  width: 100%;
+}
+
+.nav-menu a {
+  text-align: left;
+  font-size: 13px;
+  color: #333;
+  padding: 10px;
+  text-decoration: none;
+  display: block;
+}
+
+.nav-menu a:hover {
+  background-color: #9eb4cc;
+  color: white;
+}
+/* Navigation icon styling */
+.nav-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Navigation text styling */
+.nav-text {
+  display: flex;
+  align-items: center;
+}
+
+/* Main content */
+.page_content {
+  margin-left: 9%;
+  width: 92%;
+  padding: 10px;
+  overflow-y: auto;
+}
+
