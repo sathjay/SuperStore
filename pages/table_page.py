@@ -391,6 +391,217 @@ sidebar = html.Div([
     html.Div("ALDI Corporate Logo", className='logo-placeholder-bottom')
 ], className='sidebar')
 
+import dash
+import dash_bootstrap_components as dbc
+import dash_html_components as html
+import dash_core_components as dcc
+import dash_ag_grid as dag
+from dash.dependencies import Input, Output, State
+import pandas as pd
+
+# Read data from Excel file
+data_path = "assets/data/Superstore.xlsx"
+df = pd.read_excel(data_path, sheet_name="Orders")
+
+# Add Rank column (initially empty, will be calculated later)
+df["Rank"] = None
+
+dash.register_page(__name__, path='/category-ranking')
+
+# Define column definitions with formatting
+
+column_defs = [
+    {"headerName": "Row ID", "field": "Row ID", "sortable": True, "filter": True},
+    {"headerName": "Order ID", "field": "Order ID",
+        "sortable": True, "filter": True},
+    {"headerName": "Order Date", "field": "Order Date",
+        "sortable": True, "filter": True},
+    {"headerName": "Ship Date", "field": "Ship Date",
+        "sortable": True, "filter": True},
+    {"headerName": "Ship Mode", "field": "Ship Mode",
+        "sortable": True, "filter": True},
+    {"headerName": "Customer ID", "field": "Customer ID",
+        "sortable": True, "filter": True},
+    {"headerName": "Customer Name", "field": "Customer Name",
+        "sortable": True, "filter": True},
+    {"headerName": "Segment", "field": "Segment", "sortable": True, "filter": True},
+    {"headerName": "Country", "field": "Country", "sortable": True, "filter": True},
+    {"headerName": "City", "field": "City", "sortable": True, "filter": True},
+    {"headerName": "State", "field": "State", "sortable": True, "filter": True},
+    {"headerName": "Postal Code", "field": "Postal Code",
+        "sortable": True, "filter": True},
+    {"headerName": "Region", "field": "Region", "sortable": True, "filter": True},
+    {"headerName": "Product ID", "field": "Product ID",
+        "sortable": True, "filter": True},
+    {"headerName": "Category", "field": "Category",
+        "sortable": True, "filter": True},
+    {"headerName": "Sub-Category", "field": "Sub-Category",
+        "sortable": True, "filter": True},
+    {"headerName": "Product Name", "field": "Product Name",
+        "sortable": True, "filter": True},
+    {"headerName": "Sales", "field": "Sales", "sortable": True, "filter": True,
+        "valueFormatter": {"function": "(param.value ? Math.floor(param.value).toLocaleString(): '0')"}},
+    {"headerName": "Quantity", "field": "Quantity", "sortable": True, "filter": True,
+        "valueFormatter": {"function": "(param.value ? Math.floor(param.value).toLocaleString(): '0')"}},
+    {"headerName": "Discount", "field": "Discount", "sortable": True, "filter": True,
+        "valueFormatter": {"function": "(param.value ? (param.value * 100).toFixed(0) + '%' : '0%')"}},
+    {"headerName": "Profit", "field": "Profit", "sortable": True, "filter": True,
+        "valueFormatter": {"function": "(param.value ? Math.floor(param.value).toLocaleString(): '0')"}},
+    {"headerName": "Rank", "field": "Rank", "sortable": True, "filter": True},
+]
+
+
+# Layout
+layout = dbc.Container([
+    dbc.Row([
+        dbc.Col([
+            html.H4("Category Ranking", className="mt-3"),
+            html.Div([
+                dag.AgGrid(
+                    id="category-ranking-table",
+                    rowData=df.to_dict("records"),
+                    columnDefs=column_defs,
+                    defaultColDef={"resizable": True},
+                    className="ag-theme-alpine",
+                    style={"width": "100%", "overflowX": "auto"}
+                )
+            ], style={"width": "100%", "overflowX": "auto"})
+        ], width=10),
+
+        dbc.Col([
+            html.H4("Simulation Factors", className="mt-3 text-center"),
+            html.Div([
+                dbc.Row(
+                    [dbc.Col(html.P("Sales", className="factor-label"), width=12)]),
+                dbc.Row([
+                    dbc.Col(dbc.Button("-", id="sales-minus", color="danger",
+                        size="sm", className="minus-btn"), width=3, className="minus-btn-col"),
+                    dbc.Col(dbc.Input(id="sales-input", type="number",
+                        value=0, min=0, step=1), width=6),
+                    dbc.Col(dbc.Button("+", id="sales-plus", color="success",
+                        size="sm", className="plus-btn"), width=3, className="plus-btn-col"),
+                ], className="mb-2"),
+                dbc.Row(
+                    [dbc.Col(html.P("Quantity", className="factor-label"), width=12)]),
+                dbc.Row([
+                    dbc.Col(dbc.Button("-", id="quantity-minus", color="danger",
+                        size="sm", className="minus-btn"), width=3, className="minus-btn-col"),
+                    dbc.Col(dbc.Input(id="quantity-input", type="number",
+                        value=0, min=0, step=1), width=6),
+                    dbc.Col(dbc.Button("+", id="quantity-plus", color="success",
+                        size="sm", className="plus-btn"), width=3, className="plus-btn-col"),
+                ], className="mb-2"),
+                dbc.Row(
+                    [dbc.Col(html.P("Discount", className="factor-label"), width=12)]),
+                dbc.Row([
+                    dbc.Col(dbc.Button("-", id="discount-minus", color="danger",
+                        size="sm", className="minus-btn"), width=3, className="minus-btn-col"),
+                    dbc.Col(dbc.Input(id="discount-input", type="number",
+                        value=0, min=0, step=0.01), width=6),
+                    dbc.Col(dbc.Button("+", id="discount-plus", color="success",
+                        size="sm", className="plus-btn"), width=3, className="plus-btn-col"),
+                ], className="mb-2"),
+                dbc.Row(
+                    [dbc.Col(html.P("Profit", className="factor-label"), width=12)]),
+                dbc.Row([
+                    dbc.Col(dbc.Button("-", id="profit-minus", color="danger",
+                        size="sm", className="minus-btn"), width=3, className="minus-btn-col"),
+                    dbc.Col(dbc.Input(id="profit-input", type="number",
+                        value=0, min=0, step=1), width=6),
+                    dbc.Col(dbc.Button("+", id="profit-plus", color="success",
+                        size="sm", className="plus-btn"), width=3, className="plus-btn-col"),
+                ], className="mb-2"),
+            ])
+        ], width=2)
+
+    ])
+], fluid=True)
+
+/* Minus button (Red - Left) */
+.minus-btn {
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #dc3545; /* Bootstrap danger red */
+  border: none;
+}
+
+.minus-btn-col {
+  padding-top: 5px !important;
+}
+
+/* Ensure the button is centered */
+.minus-btn-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Plus button (Green - Right) */
+
+.plus-btn-col {
+  padding-top: 5px !important;
+}
+
+.plus-btn {
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #28a745; /* Bootstrap success green */
+  border: none;
+}
+
+/* Ensure the button is centered */
+.plus-btn-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Input box alignment */
+.input-box {
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Ensure buttons and input fields align properly */
+.btn-col {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Adjust spacing between rows */
+.mb-2 {
+  margin-bottom: 12px;
+  padding-left: 12px;
+  padding-right: 8px;
+}
+
+/* Factor label styling */
+.factor-label {
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 5px;
+}
+
+/* Factor Controls container */
+.factor-controls {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+
 
 /* Full page layout */
 .full_page {
