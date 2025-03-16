@@ -1,1 +1,41 @@
-This is test file
+
+Sub CalculateScoresRankAndSort()
+    Dim ws As Worksheet
+    Dim lastRow As Long
+    Dim rankCol As Integer
+    Dim scoreCol As Integer
+    Dim tableRange As Range
+
+    ' Set the worksheet (Update the sheet name if needed)
+    Set ws = ThisWorkbook.Sheets("Category Ranking") ' Change to your actual sheet name
+
+    ' Find the last used row in Column D (Composite Score)
+    lastRow = ws.Cells(ws.Rows.Count, 4).End(xlUp).Row ' Column D
+
+    ' Define column numbers
+    rankCol = 3 ' Column C (Category Rank)
+    scoreCol = 4 ' Column D (Composite Score)
+
+    ' Define the table range dynamically
+    Set tableRange = ws.Range("A10:AC" & lastRow) ' Covers all columns from A to AC
+
+    ' Step 1: Apply Composite Score Formula in Column D
+    ws.Range("D11:D" & lastRow).Formula = _
+        "=IF([@[Total Category Sales]]<[@[Category Size Backend Value]] | 0 | " & _
+        "($C$2*[@[Rescaled Brand Share]]) + " & _
+        "($C$3*[@[Rescaled Brand CAGR 2Y]]) + " & _
+        "($C$4*[@[Rescaled ALDI Category Over Under Trade]]) + " & _
+        "($C$5*[@[Rescaled ALDI Category PL Over Under Trade]]) + " & _
+        "($C$6*[@[Rescaled Total Brand Sales]]) + " & _
+        "($C$7*[@[Rescaled Brand Count Inverted in top 50%]]) + " & _
+        "[@[Category Priority Backend Value ]])"
+
+    ' Step 2: Apply Rank Formula in Column C
+    ws.Range("C11:C" & lastRow).Formula = "=RANK.EQ(D11 | $D$11:$D$" & lastRow & " | 0)"
+
+    ' Step 3: Sort the table by Rank (Column C)
+    tableRange.Sort Key1:=ws.Cells(11, rankCol), Order1:=xlAscending, Header:=xlYes
+
+    ' Notify the user
+    MsgBox "Composite Scores updated, Category Ranking applied, and table sorted!", vbInformation, "Success"
+End Sub
